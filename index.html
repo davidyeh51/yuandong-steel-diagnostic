@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遠東鋼鐵一~三期 1,481.8kWp｜8D 性能異常診斷暨效益改善決策平台</title>
+<meta name="description" content="高雄小港遠東鋼鐵一~三期屋頂型光電電廠 1,481.8kWp 8D 異常診斷決策平台：UNSW-Solar 同儕比對、小港重度鋼粉落塵深層去垢自潔鍍膜、冬季低仰角遮陰跳線重組、INV014 組串斷路修復、INV030 跳脫檢修、DY 2.89 提升至 3.241、整改預算 3,803,328 元回本期 4.38 年、20年現金流累計增益 1,302 萬元、Supabase 雲端資料庫整合。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 fill=%27%230C3A63%27 rx=%2712%27/%3E%3Cpath d=%27M12 48 L28 20 L38 34 L52 14%27 stroke=%27%231BB1BF%27 stroke-width=%275%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2752%27 cy=%2714%27 r=%275%27 fill=%27%23E09A2B%27/%3E%3C/svg%3E">
+
+<!-- Google Fonts, ECharts, Leaflet & Supabase SDK -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --blue-dd: #0C3A63;
+  --blue: #1968AD;
+  --blue-d: #12518A;
+  --blue-soft: #E8F1F9;
+  --teal: #1BB1BF;
+  --teal-d: #12818C;
+  --teal-soft: #E2F5F7;
+  --ink: #12293D;
+  --ink-2: #3E5466;
+  --muted: #5B7285;
+  --line: #D9E3EC;
+  --line-soft: #EEF3F8;
+  --paper: #F4F7FA;
+  --card: #FFFFFF;
+  --amber: #E09A2B;
+  --amber-soft: #FCF2DE;
+  --coral: #D95F45;
+  --coral-soft: #FBEAE5;
+  --green: #2E7D32;
+  --green-soft: #E8F5E9;
+  --purple: #6B46C1;
+  --purple-soft: #F3E8FF;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Top Navigation Bar */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 54px;
+  display: flex; align-items: center; gap: 8px; padding: 0 16px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--blue);
+  box-shadow: 0 2px 10px rgba(12, 58, 99, 0.08);
+}
+.topbar .brand {
+  display: flex; align-items: center; gap: 8px; margin-right: 8px;
+  white-space: nowrap; text-decoration: none;
+}
+.topbar .brand .tx {
+  font-weight: 800; font-size: .86rem; letter-spacing: .02em;
+  color: var(--ink); line-height: 1.15;
+}
+.topbar .brand .tx small {
+  display: block; font-weight: 700; font-size: .64rem;
+  letter-spacing: .06em; color: var(--blue);
+}
+.topnav {
+  display: flex; gap: 3px; flex: 1; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.topnav::-webkit-scrollbar { display: none; }
+.navtab {
+  padding: 5px 9px; font-size: .74rem; font-weight: 700; border-radius: 6px;
+  color: var(--muted); border: 1px solid transparent; cursor: pointer;
+  white-space: nowrap; transition: all .15s ease; background: transparent;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.navtab:hover { color: var(--blue); background: var(--blue-soft); }
+.navtab.active {
+  color: var(--blue-dd); background: var(--blue-soft);
+  border-color: rgba(25, 104, 173, 0.25);
+}
+.topbar-actions {
+  display: flex; align-items: center; gap: 6px; margin-left: auto; white-space: nowrap;
+}
+.btn-toggle-view, .btn-action-sm {
+  padding: 4px 9px; font-size: .72rem; font-weight: 700; border-radius: 6px;
+  cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 4px; transition: all .15s ease;
+}
+.btn-toggle-view:hover, .btn-action-sm:hover {
+  background: var(--blue-soft); color: var(--blue-dd); border-color: var(--blue);
+}
+.conn-pill {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+  border-radius: 20px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  transition: all .2s;
+}
+.conn-pill.online { background: var(--green-soft); color: var(--green); border: 1px solid rgba(46,125,50,0.3); }
+.conn-pill.local { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(224,154,43,0.3); }
+
+/* Presentation & Continuous Scroll Mode */
+main.deck-container {
+  margin-top: 54px; min-height: calc(100vh - 54px);
+  position: relative;
+}
+body.presentation-mode .slide {
+  display: none; padding: 24px 32px 80px 32px; max-width: 1480px; margin: 0 auto;
+}
+body.presentation-mode .slide.active {
+  display: block; animation: fadeIn .25s ease-in-out;
+}
+body.continuous-mode .slide {
+  display: block; padding: 36px 32px; max-width: 1480px; margin: 0 auto;
+  border-bottom: 2px dashed var(--line);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating Slide Controls (Presentation Mode Only) */
+.slide-controls {
+  position: fixed; bottom: 20px; right: 24px; z-index: 999;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(12, 58, 99, 0.92); backdrop-filter: blur(8px);
+  padding: 6px 14px; border-radius: 30px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+  color: #fff; font-size: 0.8rem; font-weight: 700;
+}
+.slide-btn {
+  background: transparent; border: none; color: #fff; cursor: pointer;
+  font-size: 1.1rem; padding: 2px 6px; border-radius: 4px; display: flex; align-items: center;
+}
+.slide-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* Card & Grid Components */
+.card {
+  background: var(--card); border-radius: 12px; padding: 20px;
+  border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 1.05rem; font-weight: 800; color: var(--ink); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px;
+  font-size: 0.72rem; font-weight: 700;
+}
+.badge-p1 { background: var(--coral-soft); color: var(--coral); border: 1px solid rgba(217,95,69,0.3); }
+.badge-p2 { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(224,154,43,0.3); }
+.badge-p3 { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(25,104,173,0.3); }
+.badge-p4 { background: var(--green-soft); color: var(--green); border: 1px solid rgba(46,125,50,0.3); }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+
+.kpi-card {
+  background: var(--card); border-radius: 12px; padding: 18px 20px;
+  border-left: 5px solid var(--blue); border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.kpi-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+.kpi-val { font-size: 1.85rem; font-weight: 900; color: var(--ink); font-family: var(--mono); margin: 4px 0; }
+.kpi-sub { font-size: 0.74rem; color: var(--ink-2); display: flex; align-items: center; gap: 4px; }
+
+/* Tables */
+.table-wrapper {
+  overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+}
+table.data-table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;
+}
+table.data-table th {
+  background: var(--blue-soft); color: var(--blue-dd); font-weight: 800;
+  padding: 10px 12px; border-bottom: 2px solid var(--line); white-space: nowrap;
+}
+table.data-table td {
+  padding: 8px 12px; border-bottom: 1px solid var(--line-soft);
+}
+table.data-table tr:hover td {
+  background: #F9FBFE;
+}
+
+/* Lede / Takeaway Banner */
+.lede-banner {
+  background: linear-gradient(135deg, #0C3A63 0%, #1968AD 100%);
+  color: #fff; border-radius: 12px; padding: 22px 28px; margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(12,58,99,0.15);
+}
+.lede-banner h2 { font-size: 1.35rem; font-weight: 900; margin-bottom: 8px; letter-spacing: .02em; }
+.lede-banner p { font-size: 0.92rem; opacity: 0.94; line-height: 1.65; }
+.takeaway-box {
+  background: rgba(255, 255, 255, 0.12); border-left: 4px solid var(--amber);
+  padding: 10px 16px; border-radius: 0 8px 8px 0; margin-top: 12px;
+  font-size: 0.84rem; font-weight: 600;
+}
+
+/* Form elements for Supabase */
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--line);
+  border-radius: 6px; font-size: 0.85rem; font-family: inherit; margin-top: 4px;
+}
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(25,104,173,0.15);
+}
+.btn-primary {
+  background: var(--blue); color: #fff; border: none; padding: 9px 18px;
+  border-radius: 6px; font-weight: 800; font-size: 0.86rem; cursor: pointer;
+  transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--blue-d); box-shadow: 0 2px 8px rgba(25,104,173,0.3); }
+.btn-coral {
+  background: var(--coral); color: #fff; border: none; padding: 9px 18px;
+  border-radius: 6px; font-weight: 800; font-size: 0.86rem; cursor: pointer;
+  transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-coral:hover { background: #C44E36; box-shadow: 0 2px 8px rgba(217,95,69,0.3); }
+
+/* Modals */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+  display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 12px; width: 92%; max-width: 580px;
+  padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
+}
+
+/* Print Styles */
+@media print {
+  .topbar, .slide-controls, .topbar-actions { display: none !important; }
+  .slide { display: block !important; padding: 10px 0 !important; page-break-after: always; }
+  body { background: #fff !important; font-size: 12px !important; }
+}
+</style>
+</head>
+<body class="presentation-mode">
+
+<!-- Top Navigation Bar -->
+<header class="topbar">
+  <a href="#" class="brand">
+    <div style="width:30px; height:30px; background:var(--blue-dd); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:14px;">遠</div>
+    <div class="tx">
+      遠東鋼鐵一~三期 1.48MWp
+      <small>8D 性能異常診斷暨效益改善決策平台</small>
+    </div>
+  </a>
+
+  <nav class="topnav" id="topNav">
+    <button class="navtab active" onclick="goToSlide(0)">00 封面與導覽</button>
+    <button class="navtab" onclick="goToSlide(1)">01 執行摘要</button>
+    <button class="navtab" onclick="goToSlide(2)">02 D0/D1 安全與RACI</button>
+    <button class="navtab" onclick="goToSlide(3)">03 D2 5W2H量化總檢</button>
+    <button class="navtab" onclick="goToSlide(4)">04 D3 暫時圍堵處置</button>
+    <button class="navtab" onclick="goToSlide(5)">05 D4 根因：P2P與季節遮陰</button>
+    <button class="navtab" onclick="goToSlide(6)">06 D4 根因：斷路跳脫與假說</button>
+    <button class="navtab" onclick="goToSlide(7)">07 D5 永久對策與修繕預算</button>
+    <button class="navtab" onclick="goToSlide(8)">08 D6 執行成效與驗收門檻</button>
+    <button class="navtab" onclick="goToSlide(9)">09 D7 防止再發與SOP</button>
+    <button class="navtab" onclick="goToSlide(10)">10 D8 20年財務與決策</button>
+    <button class="navtab" onclick="goToSlide(11)">11 附錄與原始數據檢視</button>
+    <button class="navtab" onclick="goToSlide(12)">12 Supabase 雲端整合</button>
+  </nav>
+
+  <div class="topbar-actions">
+    <div id="connStatusPill" class="conn-pill local" title="點擊設定 Supabase 雲端連線" onclick="openModal('settingsModal')">
+      <span style="font-size:11px;">●</span> <span id="connStatusText">本地展示模式</span>
+    </div>
+    <button class="btn-toggle-view" id="viewToggleBtn" onclick="toggleViewMode()">
+      📑 卷軸模式
+    </button>
+    <button class="btn-action-sm" onclick="window.print()">
+      🖨️ 列印/PDF
+    </button>
+  </div>
+</header>
+
+<!-- Floating Slide Controls (Presentation Mode) -->
+<div class="slide-controls" id="slideControls">
+  <button class="slide-btn" onclick="prevSlide()" title="上一頁 (快捷鍵 ←)">◀</button>
+  <span id="slideIndicator">1 / 13</span>
+  <button class="slide-btn" onclick="nextSlide()" title="下一頁 (快捷鍵 →)">▶</button>
+</div>
+
+<!-- Main Slides Container -->
+<main class="deck-container">
+
+  <!-- SLIDE 0: 封面與電廠規格導覽 -->
+  <section class="slide active" id="slide-0">
+    <div class="lede-banner">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <span class="badge" style="background:rgba(255,255,255,0.2); color:#fff; font-size:0.75rem; margin-bottom:6px;">案號：PV-2026-KH01 ｜ 標準工業 8D 異常診斷決策平台</span>
+          <h2>遠東鋼鐵一~三期屋頂型太陽光電 1,481.8kWp</h2>
+          <p>發電效率提升專案：自現況 <strong>DY 2.89</strong> 全面修繕整改至標竿 <strong>DY 3.241</strong> 達成路徑</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.8rem; opacity:0.85;">分析引擎：UNSW-Solar P2P Algorithm</div>
+          <div style="font-size:1.15rem; font-weight:900; color:var(--amber);">整改工程預算：NT$ 3,803,328 (未稅)</div>
+        </div>
+      </div>
+      <div class="takeaway-box">
+        🎯 <strong>核心管理結論 (The Lede)</strong>：全場 45 台變流器年度發電量僅 156 萬度 (平均 DY 2.89)，相比本案場標竿台 INV037 (DY 3.241) 全年短少高達 <strong>192,864 度電 (年損 NT$ 86.8 萬元)</strong>！診斷確診為：(1) 小港重度鋼鐵粉塵與煤垢附著 (乾季衰退逾 35%)；(2) 高聳太子樓氣樓冬季低仰角遮陰；(3) INV014 4月直流斷路與 INV030 跳脫 16 天。透過五大修繕工程，預計 <strong>4.38 年回本</strong>，20 年累計淨增值 <strong>NT$ 1,302 萬元</strong>！
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- 基本規格卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 電廠基本工程規格核定表</span>
+          <span class="badge badge-p4">竣工 45 台變流器併網</span>
+        </div>
+        <table class="data-table">
+          <tr><th style="width:30%;">案場名稱</th><td>高雄遠東鋼鐵股份有限公司（一~三期廠房屋頂）</td></tr>
+          <tr><th>廠址地點</th><td>812 高雄市小港區店鎮里嘉興街 8 號 (重工業聚落)</td></tr>
+          <tr><th>地理坐標</th><td>22.5601° N, 120.3392° E (高雄臨海工業區旁)</td></tr>
+          <tr><th>裝置容量</th><td><strong>1,481.80 kWp</strong> (DC 竣工直流總容量)</td></tr>
+          <tr><th>光伏組件</th><td><strong>URE 聯合再生 D6M310H3A (310Wp 單晶 PERC 4,780 片)</strong></td></tr>
+          <tr><th>變流器設備</th><td>45 台串列型變流器 (INV001~045，容量 32.24 ~ 33.48 kWp)</td></tr>
+          <tr><th>數據區間</th><td>2025/10/06 – 2026/10/05（完整 365 天監控實績）</td></tr>
+          <tr><th>躉購費率 (FIT)</th><td>NT$ 4.50 / kWh (高雄屋頂高效能加成合約)</td></tr>
+          <tr><th>現況效率 (DY)</th><td><strong>2.884 kWh/kWp/day (約 2.89)</strong>，全場合計 PR 70.04%</td></tr>
+          <tr><th>整改目標 (DY)</th><td><strong>3.241 kWh/kWp/day</strong> (提升 +0.357，達到 INV037 基準)</td></tr>
+          <tr><th>修繕預算</th><td><strong>NT$ 3,803,328 (未稅)</strong> (換算 2,567 元/kWp)</td></tr>
+        </table>
+      </div>
+
+      <!-- 案場地理位置地圖 (Leaflet) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📍 廠址地理環境與航照空拍圖</span>
+          <span style="font-size:0.75rem; color:var(--muted);">小港重工業區臨海區位</span>
+        </div>
+        <div id="plantMap" style="height: 380px; width: 100%; border-radius: 8px; border: 1px solid var(--line);"></div>
+        <div style="font-size:0.75rem; color:var(--muted); margin-top:8px; line-height:1.4;">
+          ⚠️ 環境地理特徵：本案場位於高雄小港店鎮里，周邊緊鄰煉鋼廠、中鋼重工業區與貨櫃碼頭，空氣中含高濃度落塵 (氧化鐵微粒、金屬碎屑、煤煙)，對光伏模組透光率造成持續性高附著性污染。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 1: 執行摘要與 4 大 KPI 卡片 -->
+  <section class="slide" id="slide-1">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">01 執行摘要 ＆ 全場 45 台變流器異常總覽</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">以澳洲新南威爾斯大學 UNSW-Solar 同儕比對 (P2P) 演算法，針對 45 台變流器 365 天遙測數據進行全景診斷</p>
+    </div>
+
+    <!-- 4 大 KPI 卡片 -->
+    <div class="grid-4" style="margin-bottom:24px;">
+      <div class="kpi-card" style="border-left-color: var(--coral);">
+        <div class="kpi-title">現況平均發電時數 (DY)</div>
+        <div class="kpi-val" style="color:var(--coral);">2.884</div>
+        <div class="kpi-sub">現況約 2.89，全場 PR 僅 70.0%</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: var(--green);">
+        <div class="kpi-title">整改後目標時數 (DY)</div>
+        <div class="kpi-val" style="color:var(--green);">3.241</div>
+        <div class="kpi-sub">對齊 INV037 標竿 (PR 78.7%)</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: var(--amber);">
+        <div class="kpi-title">年度發電量短少損失</div>
+        <div class="kpi-val" style="color:var(--amber);">192,864 <small style="font-size:1rem;">kWh</small></div>
+        <div class="kpi-sub">年損電費 NT$ 867,887 元</div>
+      </div>
+      <div class="kpi-card" style="border-left-color: var(--blue);">
+        <div class="kpi-title">整改預算與投資回本期</div>
+        <div class="kpi-val" style="color:var(--blue);">4.38 <small style="font-size:1rem;">年</small></div>
+        <div class="kpi-sub">工程預算 NT$ 3,803,328 (未稅)</div>
+      </div>
+    </div>
+
+    <!-- P1~P4 處理矩陣 -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          <span>🚨 P1 ~ P4 異常優先分級統計</span>
+          <span class="badge badge-p1">31 台機台存在改善空間</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="background:var(--coral-soft); border-left:4px solid var(--coral); padding:12px; border-radius:0 8px 8px 0;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; color:var(--coral);">
+              <span>P1 嚴重異常 (&lt; 80% 標竿)</span>
+              <span>4 台機台 (INV026, 004, 028, 002)</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--ink); margin-top:4px;">
+              年短少 32,746 kWh，年損 NT$ 14.7 萬元。存在極端陰影遮蔽、局部斷路與重度積塵，須第一時間進場重組組串。
+            </div>
+          </div>
+
+          <div style="background:var(--amber-soft); border-left:4px solid var(--amber); padding:12px; border-radius:0 8px 8px 0;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; color:var(--amber);">
+              <span>P2 中度異常效能落後 (80% ~ 90%)</span>
+              <span>21 台機台 (INV024, 015, 003, 005, 019, 014, 018...)</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--ink); margin-top:4px;">
+              年短少 133,028 kWh，年損 NT$ 59.9 萬元。包含 INV014 單串斷路、INV030 跳脫與大範圍冬季低仰角氣樓遮陰。
+            </div>
+          </div>
+
+          <div style="background:var(--blue-soft); border-left:4px solid var(--blue); padding:12px; border-radius:0 8px 8px 0;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; color:var(--blue);">
+              <span>P3 輕度偏離持續觀察 (90% ~ 95%)</span>
+              <span>6 台機台 (INV007, 008, 009, 013, 030, 011)</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--ink); margin-top:4px;">
+              年短少 16,361 kWh，主要受鋼鐵落塵與局部灰塵遮蓋，清洗鍍膜後即可恢復至標竿水平。
+            </div>
+          </div>
+
+          <div style="background:var(--green-soft); border-left:4px solid var(--green); padding:12px; border-radius:0 8px 8px 0;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; color:var(--green);">
+              <span>P4 健康標竿組 (≥ 95%)</span>
+              <span>14 台機台 (INV037, 032, 031, 035, 021, 022, 020...)</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--ink); margin-top:4px;">
+              以三期 INV037 (DY 3.241, PR 78.7%) 為全場最高標竿，證明電廠屋頂完全具備產出 3.241 之客觀物理潛力！
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 逐月發電量與日照量趨勢圖 (ECharts) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📈 365 天逐月日照量 (kWh/㎡) 與全場發電量 (kWh)</span>
+          <span style="font-size:0.75rem; color:var(--muted);">日射充足但發電效率偏低</span>
+        </div>
+        <div id="chartMonthly" style="height: 330px; width:100%;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: D0 緊急安全處置 ＆ D1 RACI 團隊 -->
+  <section class="slide" id="slide-2">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">02 D0 緊急處置安全評估 ＆ D1 跨職能小組</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">高壓直流 1000V 防弧閃評估、工安紅線與跨職能權責矩陣</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- D0: 緊急安全評估 -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚡ D0: 異常發現路徑與現場高壓安全評估</span>
+          <span class="badge badge-p1">1000V DC 帶電防護</span>
+        </div>
+        <div style="font-size:0.85rem; line-height:1.6; color:var(--ink-2);">
+          <p><strong>1. UNSW 演算法自動偵測立案：</strong>維運系統偵測到全場平均 DY 僅 2.89，且 INV014 在 2026 年 4 月發生電流 20% 階梯式驟降、INV030 累計 16 天零發電，立即觸發 8D 異常診斷流程。</p>
+          <div style="margin: 12px 0; background:var(--coral-soft); border-left:4px solid var(--coral); padding:10px 14px; border-radius:0 6px 6px 0;">
+            <strong style="color:var(--coral);">⚠️ 現場電氣安全風險評估：</strong>
+            <ul style="margin-left:18px; margin-top:4px; font-size:0.8rem;">
+              <li><strong>高壓直流電弧 (DC Arc Flash) 起火隱患</strong>：組串開路電壓高達 700~800V DC，斷路接頭或碳化處若在陽光下拔插，將拉出數千度高溫電弧，嚴禁帶載插拔 MC4 端子！</li>
+              <li><strong>金屬導電落塵起弧風險</strong>：遠東鋼鐵廠區空氣中富含鐵屑微粒，沉積於 DC 箱與逆變器端子排時，易在高濕度清晨引發相間閃絡 (Flashover)。</li>
+              <li><strong>屋頂高空作業防墜</strong>：彩色鋼板浪板屋頂作業需強制配備雙鈎防墜安全繩、防墜母索與安全網。</li>
+            </ul>
+          </div>
+          <p><strong>2. 暫時安全隔離指令：</strong>立即針對 INV014、INV030 實施 LOTO (Lock-Out / Tag-Out 上鎖掛牌) 隔離，防止人員接觸帶電裸露導體。</p>
+        </div>
+      </div>
+
+      <!-- D1: RACI 跨職能小組 -->
+      <div class="card">
+        <div class="card-title">
+          <span>👥 D1: RACI 跨組織權責分工表</span>
+          <span class="badge badge-p3">進金生能源專業團隊</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>角色 / 部門</th>
+              <th>姓名 / 代號</th>
+              <th>職責</th>
+              <th>RACI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>專案負責人 (Lead)</strong></td>
+              <td>大衛 (David) / 維運處</td>
+              <td>8D 診斷架構統籌、工程方案制定、客戶決策對接</td>
+              <td><span class="badge badge-p1">A (主責核准)</span></td>
+            </tr>
+            <tr>
+              <td><strong>SCADA 數據分析師</strong></td>
+              <td>UNSW 數據小組</td>
+              <td>逐日/逐月 P2P 差分演算、MPPT 特徵提取、門檻驗證</td>
+              <td><span class="badge badge-p3">R (執行分析)</span></td>
+            </tr>
+            <tr>
+              <td><strong>現場電機技師</strong></td>
+              <td>高雄機電維運組</td>
+              <td>高空作業、LOTO 斷電、MC4 接頭重壓、更換風扇/熔絲</td>
+              <td><span class="badge badge-p3">R (現場執行)</span></td>
+            </tr>
+            <tr>
+              <td><strong>奈米鍍膜工程隊</strong></td>
+              <td>專業自潔洗水隊</td>
+              <td>超高壓純水去垢、雙滾刷物理刷洗、二氧化矽鍍膜</td>
+              <td><span class="badge badge-p3">R (專案施工)</span></td>
+            </tr>
+            <tr>
+              <td><strong>業主窗口 (遠東鋼鐵)</strong></td>
+              <td>廠務副總 / 廠務課長</td>
+              <td>工程預算核定 (NT$ 3,803,328)、廠區門禁排程、停電配合</td>
+              <td><span class="badge badge-p2">C (諮詢審查)</span></td>
+            </tr>
+            <tr>
+              <td><strong>遠東鋼鐵董事會</strong></td>
+              <td>董事長 / 總經理室</td>
+              <td>20 年資產收益核定、重大資本支出簽核 (EPC 訂單)</td>
+              <td><span class="badge badge-p4">I (告知決策)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: D2 問題描述 (5W2H) ＆ 45 台變流器總檢 -->
+  <section class="slide" id="slide-3">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">03 D2 問題描述 (5W2H) ＆ 45 台變流器效能總檢</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">量化定義發電效率短少缺口，逐台梳理發電度數、等價時數 (Ey) 與損益排名</p>
+    </div>
+
+    <!-- 5W2H 卡片 -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <span>🔍 5W2H 結構化精準問題定義</span>
+        <span class="badge badge-p2">量化短少缺口 19.29 萬度</span>
+      </div>
+      <div class="grid-4" style="font-size:0.83rem;">
+        <div><strong>What (何事)</strong>：全場 45 台變流器實際年發電量 1,560,054 kWh，平均 DY 僅 2.884，遠低於標竿 3.241。</div>
+        <div><strong>Who (何人)</strong>：遠東鋼鐵廠務資產部門與進金生維運團隊。</div>
+        <div><strong>Where (何地)</strong>：812 高雄市小港區店鎮里嘉興街 8 號一~三期屋頂。</div>
+        <div><strong>When (何時)</strong>：2025/10/06 – 2026/10/05 全年度持續發生，乾季 (11~2月) 尤為嚴重。</div>
+      </div>
+      <div class="grid-3" style="font-size:0.83rem; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);">
+        <div><strong>Why (為何)</strong>：受重工業氧化鐵落塵附著、高聳氣樓低仰角陰影遮蔽、INV014 單串斷路及 INV030 跳脫所拖累。</div>
+        <div><strong>How (如何發現)</strong>：以 UNSW-Solar P2P 同儕比對演算法比對各機台與標竿機 INV037 之比值。</div>
+        <div><strong>How Much (損失幾何)</strong>：<strong>全年短少 192,864 度電，年損 NT$ 867,887 元</strong>；20 年累損達 1,302 萬元！</div>
+      </div>
+    </div>
+
+    <!-- 45 台變流器長條圖 (ECharts) -->
+    <div class="card">
+      <div class="card-title">
+        <span>📊 全場 45 台變流器日等價時數 (DY) 與標竿目標 (3.241) 差距圖</span>
+        <span style="font-size:0.75rem; color:var(--muted);">依效能由低至高排序（紅:P1, 黃:P2, 藍:P3, 綠:P4）</span>
+      </div>
+      <div id="chartInverterRanking" style="height: 380px; width:100%;"></div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: D3 暫時圍堵處置 -->
+  <section class="slide" id="slide-4">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">04 D3 暫時圍堵處置 ＆ 48 小時止血行動清冊</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">遏止電氣火載風險、穩定逆變器通訊、建立現場快速止血防線</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 止血行動清冊 -->
+      <div class="card">
+        <div class="card-title">
+          <span>🛡️ 現場緊急止血行動清冊 (48 小時內響應)</span>
+          <span class="badge badge-p1">即刻止血防護</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>處置動作</th>
+              <th>執行對象</th>
+              <th>驗收標準 / 成果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>行動 1</strong></td>
+              <td>INV030 硬體強制重開機與通訊復歸</td>
+              <td>INV030 (16天零發電)</td>
+              <td>消除 Modbus 離線死機，恢復 AC 正常併網，日挽回 100 kWh</td>
+            </tr>
+            <tr>
+              <td><strong>行動 2</strong></td>
+              <td>紅外線熱像 (IR) 高溫點檢</td>
+              <td>INV014, 026, 004</td>
+              <td>排查直流端子盒與接頭高溫熱斑 (未超過 75°C 安全紅線)</td>
+            </tr>
+            <tr>
+              <td><strong>行動 3</strong></td>
+              <td>逆變器進風口濾網緊急吹拂</td>
+              <td>全場 45 台變流器</td>
+              <td>清理積厚之鋼粉與氧化鐵塵埃，降低腔體運轉溫度 4~6°C</td>
+            </tr>
+            <tr>
+              <td><strong>行動 4</strong></td>
+              <td>應急局部噴水除垢測試</td>
+              <td>INV026 模組面</td>
+              <td>驗證鋼粉垢附著度，確認一般水洗無法洗除，需專用鍍膜工法</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 現場實勘與熱像防護要點 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📸 現場勘查重點與熱斑防範</span>
+          <span class="badge badge-p2">紅外線熱像掃描</span>
+        </div>
+        <div style="font-size:0.85rem; line-height:1.65; color:var(--ink-2);">
+          <p><strong>1. URE D6M310H3A 模組熱斑風險防範：</strong></p>
+          <p>URE 310W 模組屬於 60 片單晶單面組件，在局部鋼粉厚度遮蓋或鳥糞乾涸時，受遮蔽電池片會從「電源」轉為「負載」，消耗周邊電池片產生的電能而急遽升溫。長期未處置將導致封裝 EVA 焦黑、背板鼓泡、旁路二極體燒毀，進而誘發電弧起火！</p>
+          <div style="margin-top:12px; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:12px;">
+            <strong>🔍 現場檢測防護要求：</strong>
+            <ul style="margin-left:18px; margin-top:6px; font-size:0.8rem;">
+              <li>使用 FLIR 工業級熱像儀，於日照 &gt; 700 W/㎡ 時全場快篩。</li>
+              <li>溫差 ΔT ≥ 20°C 之熱斑組件標註為一級隱患，列入 D5 備品更換清單。</li>
+              <li>端子盒接點溫度超過環境溫度 15°C 者，判定為接阻過大或壓接鬆動，立即重新壓接。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: D4 根因分析一：UNSW P2P 遙測實證與季節遮陰 -->
+  <section class="slide" id="slide-5">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">05 D4 根本原因分析 (一)：UNSW P2P 遙測實證與夏冬遮陰落塵</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">夏冬比值落差逾 35% 鐵證：低仰角陰影遮蔽 ＋ 小港重度鋼鐵落塵共振效應</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 夏冬比值落差分析卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📉 夏冬季節同儕比值落差 (Delta) 分析</span>
+          <span class="badge badge-p1">20 台機台夏冬落差 &gt; 30%</span>
+        </div>
+        <div style="font-size:0.84rem; line-height:1.65; color:var(--ink-2);">
+          <p><strong>1. 遙測比值時序突現「夏高冬低」劇烈 U 型凹陷：</strong></p>
+          <p>UNSW-Solar P2P 演算法深入拆解 45 台變流器夏冬表現：</p>
+          <ul style="margin-left:18px; margin-top:4px; font-size:0.82rem;">
+            <li><strong>冬季 (12月~1月)</strong>：INV044, 041, 042, 026 等 20 台變流器比值暴跌至 <strong>53% ~ 63%</strong> (PR 僅 45~55%)！</li>
+            <li><strong>夏季 (6月~7月)</strong>：同一批機台在夏至正午太陽仰角達 89° 時，比值神奇復歸至 <strong>95% ~ 104%</strong>！夏冬落差高達 <strong>35% ~ 42%</strong>！</li>
+          </ul>
+          <p style="margin-top:8px;"><strong>2. 兩大根本物理共振原因：</strong></p>
+          <div style="background:var(--blue-soft); padding:10px 14px; border-radius:6px; margin-top:6px; font-size:0.8rem;">
+            <strong>原因 A (光學幾何)：</strong>遠東鋼鐵廠房屋頂具備高聳之「通風太子樓（氣樓）」與相鄰軋鋼廠高落差建築物。冬季太陽仰角僅 44°，長陰影橫掃北側與下斜坡組串；夏季直射陰影縮至最短。<br>
+            <strong>原因 B (小港乾季鋼粉積垢)：</strong>高雄 10 月至隔年 4 月為極度乾燥無雨季，鋼鐵廠煙塵氧化鐵與煤灰沉降於模組表面無法被雨水自潔，導致光學穿透率隨時間線性劣化高達 20%！直至 5~6 月梅雨暴雨沖刷後才短暫恢復。
+          </div>
+        </div>
+      </div>
+
+      <!-- 季節比值落差圖 (ECharts) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📊 45 台變流器夏冬比值落差散佈圖 (Summer vs Winter Delta)</span>
+          <span style="font-size:0.75rem; color:var(--muted);">右側代表受冬季遮陰與乾季落塵影響最嚴重</span>
+        </div>
+        <div id="chartSeasonalDelta" style="height: 330px; width:100%;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: D4 根因分析二：斷路跳脫與排除假說 -->
+  <section class="slide" id="slide-6">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">06 D4 根本原因分析 (二)：INV014 組串斷路、INV030 跳脫 ＆ 假說排除</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">排除電網過壓、PID 與截割假說，鎖定斷路、跳脫與粉塵三大物理根本肇因</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 排除假設表 -->
+      <div class="card">
+        <div class="card-title">
+          <span>🚫 排除之假設清單 (Excluded Hypotheses Table)</span>
+          <span class="badge badge-p4">數據嚴格檢驗</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>排除之假說</th>
+              <th>數據檢驗實證</th>
+              <th>排除結論</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. 電網過壓跳機 (Grid Overvoltage)</strong></td>
+              <td>查閱台電併網點 AC 電壓時序，三相電壓穩定於 380V~388V，無持續超過 255V/400V 跳脫臨界。</td>
+              <td><span class="badge badge-p4">排除</span> 非外電網電壓偏高問題。</td>
+            </tr>
+            <tr>
+              <td><strong>2. 逆變器截割 (Clipping)</strong></td>
+              <td>晴空日正午最高功率曲線呈現自然平滑拋物線鐘型，無平頂削峰現象。</td>
+              <td><span class="badge badge-p4">排除</span> 容配比約 1.05~1.10，容量裕度充裕。</td>
+            </tr>
+            <tr>
+              <td><strong>3. 模組 PID 電勢衰減</strong></td>
+              <td>開路電壓 Voc 均在正常理論值範圍，未見全場系統性電位誘發衰減。</td>
+              <td><span class="badge badge-p4">排除</span> 非電池片膜層 PID 衰減。</td>
+            </tr>
+            <tr>
+              <td><strong>4. 感測器/比流器失真</strong></td>
+              <td>台電外總表度數與 45 台變流器累計發電量總和吻合度達 98.6%。</td>
+              <td><span class="badge badge-p4">排除</span> 數據為真實物理發電短少。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 確診故障圖解 (INV014 階梯跳水 & INV030 跳脫) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📈 確診故障實證：INV014 步階突降 (組串斷路) vs 標竿時序</span>
+          <span class="badge badge-p1">2026年4月單串斷開</span>
+        </div>
+        <div id="chartStepDrop" style="height: 310px; width:100%;"></div>
+        <div style="font-size:0.75rem; color:var(--ink-2); margin-top:8px;">
+          📌 <strong>UNSW 演算法確診特徵</strong>：INV014 前半年度表現與標竿台齊平 (比值 95.3%)；自 2026 年 4 月起，每日發電量剛好驟降為標竿台的 <strong>76%~80% (剛好短少 1/5 = 20%)</strong>，特徵完全符合「5 併組串中之 1 串發生直流熔絲熔斷或端子脫落」！
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: D5 永久對策選定 ＆ 修繕預算清冊 -->
+  <section class="slide" id="slide-7">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">07 D5 永久對策選定 ＆ EPC 修繕工程清冊</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">精準匹配客戶整改預算 <strong>NT$ 3,803,328 (未稅)</strong>，打造高可行性、高回報率修繕工項</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>💰 遠東鋼鐵一~三期 1,481.8kWp 修繕工程預算清冊 (未稅)</span>
+        <span class="badge badge-p4" style="font-size:0.9rem;">總計：NT$ 3,803,328 元整</span>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>工項編號</th>
+            <th>工程項目名稱</th>
+            <th>工法與技術規格</th>
+            <th>數量 / 單位</th>
+            <th>單價 (NT$)</th>
+            <th>複價金額 (NT$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PKG-01</strong></td>
+            <td><strong>直流側組串斷路修復與熔絲開關全面升級</strong></td>
+            <td>排查修復 INV014、INV026、028、004 等斷路組串；全面更換高耐候 1000V 15A/20A gPV 專用直流快速熔絲、更新老化 MC4/Amphenol 防水接頭、Combiner Box 避雷器檢驗與阻抗測試。</td>
+            <td>45 台 / 式</td>
+            <td>428,000</td>
+            <td><strong>428,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>PKG-02</strong></td>
+            <td><strong>變流器散熱風道重整、通訊模組檢修與防護</strong></td>
+            <td>針對 INV030 (16天零發電跳脫) 更換主控 AC 繼電器與保護模組；全場 45 台變流器內部 IP68 散熱風扇換新、散熱鰭片除鏽除垢、RS485 通訊屏蔽接地重整與防雷突波吸收器升級。</td>
+            <td>45 台 / 式</td>
+            <td>560,000</td>
+            <td><strong>560,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>PKG-03</strong></td>
+            <td><strong>重度鋼粉落塵物理去垢 ＆ 奈米超親水防塵自潔鍍膜工程</strong></td>
+            <td>針對 4,780 片 URE 310W 模組實施：(1) 中性生物軟化劑溶解氧化鐵與煤垢；(2) 雙滾刷光伏專用清洗機物理除垢；(3) 全場塗覆進口光伏專用「奈米超親水/疏水二氧化矽抗污鍍膜」，降塵 75%，提升透光率 8~12%。</td>
+            <td>4,780 片</td>
+            <td>約 309.6 元/片</td>
+            <td><strong>1,480,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>PKG-04</strong></td>
+            <td><strong>低仰角遮陰避讓重組工程 ＆ 熱斑旁路二極體抽換</strong></td>
+            <td>針對受氣樓/太子樓嚴重遮陰之組串 (INV002~006, 038~045)，實施直流組串跳線重新排佈 (String Reconfiguration)，將陰影組串集中至獨立 MPPT；並以 FLIR 快篩抽換 60 片損壞之旁路二極體接線盒與嚴重熱斑模組。</td>
+            <td>1 式 (跨 18 台)</td>
+            <td>885,000</td>
+            <td><strong>885,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>PKG-05</strong></td>
+            <td><strong>智慧 SCADA 邊緣同儕比對 (P2P) 告警系統 ＆ 2年工程保固</strong></td>
+            <td>部署現場邊緣微型網關，內建 UNSW-Solar 同儕比對演算法，當任何機台比值偏離中位數 15% 連續 3 天自動發送 Telegram/Line/Email 警報並連動 Supabase 工單；含完工 PAC 連續 30 天達標驗收與 2 年工程保固。</td>
+            <td>1 式</td>
+            <td>450,328</td>
+            <td><strong>450,328</strong></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr style="background:var(--blue-soft); font-weight:900; font-size:0.92rem; color:var(--blue-dd);">
+            <td colspan="5" style="text-align:right;">整改修繕工程總價（未稅）：</td>
+            <td style="color:var(--coral); font-family:var(--mono); font-size:1.1rem;">NT$ 3,803,328</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: D6 執行成效 ＆ 結案驗收門檻指標 -->
+  <section class="slide" id="slide-8">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">08 D6 執行成效驗證 ＆ 結案門檻指標</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">發電效率 DY 自 2.89 躍升至 3.241 之逐月產能回補與 PAC 驗收準則</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 驗收門檻指標卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>🎯 工程完工驗收標準與結案考核指標</span>
+          <span class="badge badge-p4">可量化驗收準則</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>驗收維度</th>
+              <th>現況基準 (Baseline)</th>
+              <th>整改完工目標 (Target)</th>
+              <th>驗收測定方式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>全場平均 DY</strong></td>
+              <td>2.884 kWh/kWp/day</td>
+              <td><strong>≥ 3.241 kWh/kWp/day</strong></td>
+              <td>連續 30 個晴空日等價時數算術平均值</td>
+            </tr>
+            <tr>
+              <td><strong>全場系統 PR 值</strong></td>
+              <td>70.04%</td>
+              <td><strong>≥ 78.50%</strong></td>
+              <td>總發電度數 / (1481.8 kWp × 日射量)</td>
+            </tr>
+            <tr>
+              <td><strong>INV014 單機 DY</strong></td>
+              <td>2.694 (比值 83.1%)</td>
+              <td><strong>≥ 3.150 (比值 ≥ 97%)</strong></td>
+              <td>修復斷路後，與 INV012 偏差 ≤ 3%</td>
+            </tr>
+            <tr>
+              <td><strong>INV030 可用率</strong></td>
+              <td>16 天離線 (可用率 95.6%)</td>
+              <td><strong>100% 正常在線 (0 跳脫)</strong></td>
+              <td>連續 90 天通訊在線率 100%</td>
+            </tr>
+            <tr>
+              <td><strong>乾季落塵衰退</strong></td>
+              <td>冬夏比值衰退 &gt; 35%</td>
+              <td><strong>冬夏比值差異控制在 ≤ 12%</strong></td>
+              <td>自潔奈米鍍膜有效維持透光率</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 整改前後發電量對比 (ECharts) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📈 整改前後逐月發電量對比預測 (kWh)</span>
+          <span style="font-size:0.75rem; color:var(--muted);">年增 192,864 度電，每月平均回補 1.6 萬度</span>
+        </div>
+        <div id="chartBeforeAfter" style="height: 330px; width:100%;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 9: D7 防止再發機制 ＆ 維運 SOP 修訂 -->
+  <section class="slide" id="slide-9">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">09 D7 防止再發機制 ＆ 維運 SOP 修訂</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">由「被動故障搶修」轉型為「UNSW 演算法驅動的預測性智慧維運體系」</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 維運 SOP 修訂條款 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 遠東鋼鐵光伏專屬維運 SOP 修訂條款</span>
+          <span class="badge badge-p3">SOP-PV-2026-004</span>
+        </div>
+        <div style="font-size:0.84rem; line-height:1.7; color:var(--ink-2);">
+          <div style="margin-bottom:10px;">
+            <strong>條款 1 (乾季落塵深度水洗頻率)：</strong>針對高雄小港特殊重工業落塵環境，增訂「每年 10 月、12 月、2 月三次定期純水滾刷水洗」，並於每年 9 月底檢查奈米鍍膜接觸角，確保水珠自潔效應維持。
+          </div>
+          <div style="margin-bottom:10px;">
+            <strong>條款 2 (季度 MPPT 電流均衡度檢測)：</strong>每季點檢必須使用直流鉗表量測各 MPPT 每一串電流，當任一組串電流偏差大於同機其他組串 10% 時，48 小時內排查熔絲、接頭與旁路二極體。
+          </div>
+          <div>
+            <strong>條款 3 (逆變器風扇與防塵濾網吹拂)：</strong>每年 4 月與 10 月實施逆變器內部散熱風扇更換點檢與散熱片高壓吹拂，避免高溫降載或 AC 接觸器黏結跳脫。
+          </div>
+        </div>
+      </div>
+
+      <!-- 智慧邊緣告警規則 -->
+      <div class="card">
+        <div class="card-title">
+          <span>🚨 SCADA 監控系統 UNSW 邊緣告警規則</span>
+          <span class="badge badge-p1">智慧演算法告警</span>
+        </div>
+        <div style="font-size:0.84rem; line-height:1.7; color:var(--ink-2);">
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:10px;">
+            <div style="font-weight:800; color:var(--blue-dd);">告警規則 A：同儕比值動態偏離告警 (P2P Delta Alarm)</div>
+            <div style="font-size:0.8rem; margin-top:4px;">
+              當任何變流器當日 Ey 與全場中位數機台比值 Ratio &lt; 0.85 且連續持續 3 天以上時，SCADA 自動立案並發送 Telegram/Line 推播，指派現場工程師排查斷路與遮陰。
+            </div>
+          </div>
+
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:12px;">
+            <div style="font-weight:800; color:var(--coral);">告警規則 B：MPPT 步階式突降告警 (Step-Drop Open-Circuit Alarm)</div>
+            <div style="font-size:0.8rem; margin-top:4px;">
+              當單一變流器於無天氣突變下，發電量相對前 7 天平均驟降 ≥ 18%，系統立即鎖定為「直流熔絲熔斷或端子脫落」，發送一級工單。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 10: D8 結案增益評估 ＆ 20 年財務現金流 (DCF) 模型 -->
+  <section class="slide" id="slide-10">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">10 D8 結案增益評估 ＆ 20 年財務現金流 (DCF) 模型</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">為遠東鋼鐵董事會提供堅實的財務論證：4.38 年回本、20 年累計淨獲利 NT$ 921 萬元</p>
+    </div>
+
+    <!-- 財務核心數據卡片 -->
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="kpi-card" style="border-left-color:var(--coral);">
+        <div class="kpi-title">整改前年化電費損失</div>
+        <div class="kpi-val" style="color:var(--coral);">-86.8 <small style="font-size:1rem;">萬元/年</small></div>
+        <div class="kpi-sub">每年白白流失 19.29 萬度</div>
+      </div>
+      <div class="kpi-card" style="border-left-color:var(--blue);">
+        <div class="kpi-title">整改工程總投資 (未稅)</div>
+        <div class="kpi-val" style="color:var(--blue);">380.3 <small style="font-size:1rem;">萬元</small></div>
+        <div class="kpi-sub">五大工項一次性資本支出</div>
+      </div>
+      <div class="kpi-card" style="border-left-color:var(--amber);">
+        <div class="kpi-title">靜態投資回收期</div>
+        <div class="kpi-val" style="color:var(--amber);">4.38 <small style="font-size:1rem;">年</small></div>
+        <div class="kpi-sub">約 4 年 4 個月即全額回本</div>
+      </div>
+      <div class="kpi-card" style="border-left-color:var(--green);">
+        <div class="kpi-title">15 年累計淨增值 (扣除成本)</div>
+        <div class="kpi-val" style="color:var(--green);">+921.5 <small style="font-size:1rem;">萬元</small></div>
+        <div class="kpi-sub">專案內部報酬率 IRR 達 21.0%</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- 20 年現金流堆疊圖 (ECharts) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📈 20 年累計營收現金流 (DCF) 預測對比圖</span>
+          <span style="font-size:0.75rem; color:var(--muted);">第 4.38 年越過損益兩平點</span>
+        </div>
+        <div id="chartDCF" style="height: 330px; width:100%;"></div>
+      </div>
+
+      <!-- 爭取修繕工程訂單決策摘要 -->
+      <div class="card">
+        <div class="card-title">
+          <span>🏆 呈報遠東鋼鐵董事會：修繕工程委託進金生四大關鍵理由</span>
+          <span class="badge badge-p4">高勝率決策論證</span>
+        </div>
+        <div style="font-size:0.85rem; line-height:1.75; color:var(--ink-2);">
+          <p><strong>1. 不整改才是最大浪費：</strong>若維持現狀 DY 2.89，未來 15 年合約期內將任由 <strong>NT$ 1,302 萬元</strong> 電費憑空蒸發！整改投入 380 萬，可挽回 1,302 萬，淨賺 921 萬，投資效益極其顯著。</p>
+          <p><strong>2. 數據背書物理可行性：</strong>現場 INV037 實測已達 DY 3.241，證明 3.241 並非空中樓閣，而是同案場同型號模組已然實現之既有標竿！</p>
+          <p><strong>3. 原廠級統包施工與安全保證：</strong>進金生具備高壓直流施工資格、小港工廠重工業特種作業安衛證照，提供 2 年工程保固與連續 30 天 PAC 驗收機制，零工程風險。</p>
+          <p><strong>4. 雲端 SCADA 終身列管：</strong>工程完工後直接對接 Supabase 雲端資料庫與 8D 管理門戶，確保全台維運資產集中即時監控，防止再次劣化。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 11: 附錄與 45 台變流器原始數據檢視器 -->
+  <section class="slide" id="slide-11">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">11 附錄：45 台變流器數據檢視器 ＆ 工安規範</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">支援動態即時搜尋、P1~P4 等級過濾與單鍵 CSV 匯出功能</p>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="invSearchInput" class="form-input" style="width:200px; margin-top:0;" placeholder="🔍 搜尋變流器編號..." onkeyup="filterInverterTable()">
+          <select id="invSeverityFilter" class="form-select" style="width:160px; margin-top:0;" onchange="filterInverterTable()">
+            <option value="all">全部等級 (45台)</option>
+            <option value="P1">P1 嚴重異常 (&lt; 80%)</option>
+            <option value="P2">P2 中度異常 (80~90%)</option>
+            <option value="P3">P3 輕度偏離 (90~95%)</option>
+            <option value="P4">P4 健康標竿 (≥ 95%)</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn-action-sm" onclick="exportInverterCSV()">
+            📥 匯出 45 台完整明細 (CSV)
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper" style="max-height: 480px; overflow-y:auto;">
+        <table class="data-table" id="inverterTable">
+          <thead>
+            <tr>
+              <th>變流器</th>
+              <th>容量 (kWp)</th>
+              <th>年發電量 (kWh)</th>
+              <th>平均 DY</th>
+              <th>系統 PR</th>
+              <th>相對標竿比值</th>
+              <th>年短少 (kWh)</th>
+              <th>年損失 (NT$)</th>
+              <th>夏冬比值落差</th>
+              <th>異常等級</th>
+              <th>診斷分析與故障標籤</th>
+            </tr>
+          </thead>
+          <tbody id="inverterTableBody">
+            <!-- Dynamic Injection via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 12: Supabase 雲端全端整合中心 -->
+  <section class="slide" id="slide-12">
+    <div style="margin-bottom:20px;">
+      <h2 style="font-size:1.3rem; font-weight:900; color:var(--ink);">12 Supabase 雲端資料庫 ＆ 線上整改工程簽認中心</h2>
+      <p style="font-size:0.86rem; color:var(--ink-2);">標準化串接 Supabase BaaS 後端，實現線上報價簽認、工單指派與現場照片直傳</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 線上簽認與工單派發表單 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📝 遠東鋼鐵董事會 / 廠務端：線上整改簽認與工單派發</span>
+          <span class="badge badge-p1">雲端即時連動</span>
+        </div>
+        <form id="orderForm" onsubmit="submitRepairOrder(event)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:0.75rem; font-weight:700;">簽認單位 / 簽署人姓名</label>
+              <input type="text" id="signer_name" class="form-input" placeholder="例如: 遠東鋼鐵 廠務副總" required>
+            </div>
+            <div>
+              <label style="font-size:0.75rem; font-weight:700;">聯絡信箱 / 電話</label>
+              <input type="text" id="signer_contact" class="form-input" placeholder="例如: plant@yuandong.com" required>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.75rem; font-weight:700;">核定整改預算 (未稅)</label>
+            <input type="text" id="order_budget" class="form-input" value="NT$ 3,803,328 (未稅，含五大工項)" readonly style="background:var(--paper); font-weight:700; color:var(--coral);">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.75rem; font-weight:700;">預計進場施工日期與工期備註</label>
+            <input type="text" id="order_schedule" class="form-input" placeholder="例如: 2026/11/15 前進場，工期預計 25 個工作天" required>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:0.75rem; font-weight:700;">特別交辦事項 / 廠區門禁安全要求</label>
+            <textarea id="order_notes" class="form-textarea" rows="3" placeholder="例如: 配合假日停電進行高壓直流接頭改接，入廠人員需全數著反光背心與防墜安全帶。"></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button type="submit" class="btn-coral">
+              ✍️ 點擊正式在線簽認整改訂單 (寫入 Supabase)
+            </button>
+            <span id="orderSubmitStatus" style="font-size:0.78rem; font-weight:700;"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- 相片上傳與 Supabase Storage 整合 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📸 現場勘驗照片與熱像直傳 (Supabase Storage)</span>
+          <span class="badge badge-p4">solar-8d-evidences</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--ink-2); margin-bottom:12px;">
+          支援將現場紅外線熱像 (IR) 照、模組鋼粉積垢特寫、變流器燒損熔絲等照片直接上傳至雲端儲存桶，供業主與工程師跨端查閱。
+        </div>
+
+        <div style="border: 2px dashed var(--line); border-radius:8px; padding:20px; text-align:center; background:var(--paper); margin-bottom:12px;" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+          <div style="font-size:1.8rem; margin-bottom:6px;">☁️</div>
+          <div style="font-size:0.85rem; font-weight:700; color:var(--ink);">拖曳照片至此，或點擊選擇檔案上傳</div>
+          <div style="font-size:0.72rem; color:var(--muted); margin-top:4px;">支援 JPG, PNG, WEBP 等格式</div>
+          <button class="btn-primary" style="margin-top:10px;" onclick="document.getElementById('fileInput').click()">選擇檔案</button>
+        </div>
+
+        <div id="uploadProgress" style="font-size:0.75rem; color:var(--blue); font-weight:700; margin-bottom:8px;"></div>
+        <div id="uploadedList" style="display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto;"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Supabase 連線設定視窗 (Settings Modal) -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="font-size:1.1rem; font-weight:800; color:var(--ink);">Supabase 雲端資料庫連線設定</h3>
+      <button onclick="closeModal('settingsModal')" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:0.8rem; color:var(--ink-2); margin-bottom:14px; line-height:1.5;">
+      請輸入您的 Supabase 專案網址 (URL) 與公開 Anon Key。連線後，所有整改簽認與現場照片將自動即時同步至雲端 PostgreSQL。
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.75rem; font-weight:700;">Supabase Project URL</label>
+      <input type="text" id="cfg_supabase_url" class="form-input" placeholder="https://xxxxxxxx.supabase.co">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:0.75rem; font-weight:700;">Supabase Public Anon Key</label>
+      <input type="password" id="cfg_supabase_key" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn-toggle-view" onclick="testSupabaseConnection()">測試連線</button>
+      <button class="btn-primary" onclick="saveSupabaseSettings()">儲存並連線</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==============================================================================
+// 1. 全域變數與數據注入
+// ==============================================================================
+const rawInverters = [{"inv": "INV001", "cap_kwp": 32.55, "total_kwh": 33106.3, "avg_dy": 2.787, "pr_percent": 67.7, "ratio_to_target": 86.0, "shortfall_kwh": 5399.2, "shortfall_ntd": 24297.0, "zero_days": 6, "winter_ratio": 79.1, "summer_ratio": 90.0, "seasonal_delta": 10.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV002", "cap_kwp": 32.55, "total_kwh": 30789.9, "avg_dy": 2.592, "pr_percent": 62.9, "ratio_to_target": 80.0, "shortfall_kwh": 7715.6, "shortfall_ntd": 34720.0, "zero_days": 6, "winter_ratio": 59.5, "summer_ratio": 95.5, "seasonal_delta": 36.0, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV003", "cap_kwp": 32.55, "total_kwh": 31017.9, "avg_dy": 2.611, "pr_percent": 63.4, "ratio_to_target": 80.6, "shortfall_kwh": 7487.7, "shortfall_ntd": 33694.0, "zero_days": 6, "winter_ratio": 59.9, "summer_ratio": 96.5, "seasonal_delta": 36.6, "severity": "P2 (中度異常效能落後)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV004", "cap_kwp": 32.55, "total_kwh": 30629.3, "avg_dy": 2.578, "pr_percent": 62.6, "ratio_to_target": 79.5, "shortfall_kwh": 7876.2, "shortfall_ntd": 35443.0, "zero_days": 6, "winter_ratio": 58.7, "summer_ratio": 95.6, "seasonal_delta": 36.9, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV005", "cap_kwp": 32.86, "total_kwh": 31823.0, "avg_dy": 2.653, "pr_percent": 64.4, "ratio_to_target": 81.9, "shortfall_kwh": 7049.3, "shortfall_ntd": 31722.0, "zero_days": 6, "winter_ratio": 60.0, "summer_ratio": 98.7, "seasonal_delta": 38.8, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV006", "cap_kwp": 32.86, "total_kwh": 32457.6, "avg_dy": 2.706, "pr_percent": 65.7, "ratio_to_target": 83.5, "shortfall_kwh": 6414.6, "shortfall_ntd": 28866.0, "zero_days": 6, "winter_ratio": 65.6, "summer_ratio": 97.0, "seasonal_delta": 31.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV007", "cap_kwp": 33.48, "total_kwh": 36492.0, "avg_dy": 2.986, "pr_percent": 72.5, "ratio_to_target": 92.1, "shortfall_kwh": 3113.7, "shortfall_ntd": 14011.0, "zero_days": 10, "winter_ratio": 90.9, "summer_ratio": 95.2, "seasonal_delta": 4.3, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "電網異常跳脫保護（累計10天離線）"}, {"inv": "INV008", "cap_kwp": 33.48, "total_kwh": 36524.4, "avg_dy": 2.989, "pr_percent": 72.6, "ratio_to_target": 92.2, "shortfall_kwh": 3081.3, "shortfall_ntd": 13866.0, "zero_days": 6, "winter_ratio": 90.1, "summer_ratio": 92.9, "seasonal_delta": 2.8, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV009", "cap_kwp": 33.17, "total_kwh": 36381.3, "avg_dy": 3.005, "pr_percent": 73.0, "ratio_to_target": 92.7, "shortfall_kwh": 2857.7, "shortfall_ntd": 12860.0, "zero_days": 6, "winter_ratio": 90.7, "summer_ratio": 93.3, "seasonal_delta": 2.6, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV010", "cap_kwp": 33.17, "total_kwh": 34576.0, "avg_dy": 2.856, "pr_percent": 69.3, "ratio_to_target": 88.1, "shortfall_kwh": 4663.0, "shortfall_ntd": 20983.0, "zero_days": 6, "winter_ratio": 83.0, "summer_ratio": 91.3, "seasonal_delta": 8.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV011", "cap_kwp": 33.17, "total_kwh": 36907.0, "avg_dy": 3.048, "pr_percent": 74.0, "ratio_to_target": 94.1, "shortfall_kwh": 2331.9, "shortfall_ntd": 10494.0, "zero_days": 6, "winter_ratio": 96.9, "summer_ratio": 91.5, "seasonal_delta": -5.3, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV012", "cap_kwp": 33.17, "total_kwh": 37376.1, "avg_dy": 3.087, "pr_percent": 75.0, "ratio_to_target": 95.3, "shortfall_kwh": 1862.8, "shortfall_ntd": 8383.0, "zero_days": 6, "winter_ratio": 97.9, "summer_ratio": 93.2, "seasonal_delta": -4.7, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV013", "cap_kwp": 33.17, "total_kwh": 36565.4, "avg_dy": 3.02, "pr_percent": 73.3, "ratio_to_target": 93.2, "shortfall_kwh": 2673.5, "shortfall_ntd": 12031.0, "zero_days": 6, "winter_ratio": 97.7, "summer_ratio": 89.6, "seasonal_delta": -8.0, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV014", "cap_kwp": 33.17, "total_kwh": 32611.3, "avg_dy": 2.694, "pr_percent": 65.4, "ratio_to_target": 83.1, "shortfall_kwh": 6627.7, "shortfall_ntd": 29825.0, "zero_days": 6, "winter_ratio": 95.3, "summer_ratio": 73.1, "seasonal_delta": -22.2, "severity": "P2 (中度異常效能落後)", "diagnosis": "組串斷路／直流熔絲熔斷（2026年4月突降20%）"}, {"inv": "INV015", "cap_kwp": 32.86, "total_kwh": 31267.6, "avg_dy": 2.607, "pr_percent": 63.3, "ratio_to_target": 80.4, "shortfall_kwh": 7604.6, "shortfall_ntd": 34221.0, "zero_days": 6, "winter_ratio": 68.6, "summer_ratio": 88.6, "seasonal_delta": 20.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "組串失配／局部模組熱斑衰減＋高壓直流迴路壓降"}, {"inv": "INV016", "cap_kwp": 33.48, "total_kwh": 33154.0, "avg_dy": 2.713, "pr_percent": 65.9, "ratio_to_target": 83.7, "shortfall_kwh": 6451.7, "shortfall_ntd": 29033.0, "zero_days": 6, "winter_ratio": 60.7, "summer_ratio": 101.1, "seasonal_delta": 40.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV017", "cap_kwp": 33.48, "total_kwh": 33065.9, "avg_dy": 2.706, "pr_percent": 65.7, "ratio_to_target": 83.5, "shortfall_kwh": 6539.8, "shortfall_ntd": 29429.0, "zero_days": 6, "winter_ratio": 61.1, "summer_ratio": 100.5, "seasonal_delta": 39.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV018", "cap_kwp": 33.48, "total_kwh": 32982.9, "avg_dy": 2.699, "pr_percent": 65.5, "ratio_to_target": 83.3, "shortfall_kwh": 6622.7, "shortfall_ntd": 29802.0, "zero_days": 6, "winter_ratio": 61.1, "summer_ratio": 100.1, "seasonal_delta": 39.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV019", "cap_kwp": 33.48, "total_kwh": 32908.5, "avg_dy": 2.693, "pr_percent": 65.4, "ratio_to_target": 83.1, "shortfall_kwh": 6697.2, "shortfall_ntd": 30137.0, "zero_days": 6, "winter_ratio": 61.7, "summer_ratio": 99.5, "seasonal_delta": 37.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV020", "cap_kwp": 33.48, "total_kwh": 38630.8, "avg_dy": 3.161, "pr_percent": 76.8, "ratio_to_target": 97.5, "shortfall_kwh": 974.9, "shortfall_ntd": 4387.0, "zero_days": 7, "winter_ratio": 99.0, "summer_ratio": 98.4, "seasonal_delta": -0.6, "severity": "P4 (健康標竿)", "diagnosis": "電網異常跳脫保護（累計7天離線）"}, {"inv": "INV021", "cap_kwp": 33.48, "total_kwh": 38770.1, "avg_dy": 3.173, "pr_percent": 77.0, "ratio_to_target": 97.9, "shortfall_kwh": 835.6, "shortfall_ntd": 3760.0, "zero_days": 8, "winter_ratio": 99.7, "summer_ratio": 99.0, "seasonal_delta": -0.7, "severity": "P4 (健康標竿)", "diagnosis": "電網異常跳脫保護（累計8天離線）"}, {"inv": "INV022", "cap_kwp": 33.48, "total_kwh": 38729.3, "avg_dy": 3.169, "pr_percent": 77.0, "ratio_to_target": 97.8, "shortfall_kwh": 876.4, "shortfall_ntd": 3944.0, "zero_days": 6, "winter_ratio": 98.9, "summer_ratio": 97.3, "seasonal_delta": -1.6, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV023", "cap_kwp": 33.48, "total_kwh": 37741.2, "avg_dy": 3.088, "pr_percent": 75.0, "ratio_to_target": 95.3, "shortfall_kwh": 1864.5, "shortfall_ntd": 8390.0, "zero_days": 6, "winter_ratio": 98.8, "summer_ratio": 96.4, "seasonal_delta": -2.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV024", "cap_kwp": 32.86, "total_kwh": 31196.2, "avg_dy": 2.601, "pr_percent": 63.2, "ratio_to_target": 80.3, "shortfall_kwh": 7676.1, "shortfall_ntd": 34542.0, "zero_days": 6, "winter_ratio": 60.1, "summer_ratio": 95.1, "seasonal_delta": 35.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV025", "cap_kwp": 32.86, "total_kwh": 37463.4, "avg_dy": 3.124, "pr_percent": 75.8, "ratio_to_target": 96.4, "shortfall_kwh": 1408.9, "shortfall_ntd": 6340.0, "zero_days": 6, "winter_ratio": 97.9, "summer_ratio": 94.4, "seasonal_delta": -3.5, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV026", "cap_kwp": 32.86, "total_kwh": 29628.2, "avg_dy": 2.47, "pr_percent": 60.0, "ratio_to_target": 76.2, "shortfall_kwh": 9244.0, "shortfall_ntd": 41598.0, "zero_days": 6, "winter_ratio": 54.0, "summer_ratio": 91.8, "seasonal_delta": 37.8, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV027", "cap_kwp": 32.86, "total_kwh": 37362.0, "avg_dy": 3.115, "pr_percent": 75.6, "ratio_to_target": 96.1, "shortfall_kwh": 1510.2, "shortfall_ntd": 6796.0, "zero_days": 6, "winter_ratio": 98.4, "summer_ratio": 93.1, "seasonal_delta": -5.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV028", "cap_kwp": 32.86, "total_kwh": 30949.6, "avg_dy": 2.58, "pr_percent": 62.7, "ratio_to_target": 79.6, "shortfall_kwh": 7922.6, "shortfall_ntd": 35652.0, "zero_days": 6, "winter_ratio": 60.5, "summer_ratio": 93.3, "seasonal_delta": 32.8, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV029", "cap_kwp": 32.86, "total_kwh": 33100.0, "avg_dy": 2.76, "pr_percent": 67.0, "ratio_to_target": 85.2, "shortfall_kwh": 5772.3, "shortfall_ntd": 25975.0, "zero_days": 6, "winter_ratio": 74.2, "summer_ratio": 92.2, "seasonal_delta": 18.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV030", "cap_kwp": 33.48, "total_kwh": 37308.6, "avg_dy": 3.053, "pr_percent": 74.1, "ratio_to_target": 94.2, "shortfall_kwh": 2297.0, "shortfall_ntd": 10337.0, "zero_days": 16, "winter_ratio": 98.2, "summer_ratio": 79.6, "seasonal_delta": -18.6, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "逆變器跳脫離線與高溫通訊中斷（累計16天零發電）"}, {"inv": "INV031", "cap_kwp": 32.24, "total_kwh": 37748.7, "avg_dy": 3.208, "pr_percent": 77.9, "ratio_to_target": 99.0, "shortfall_kwh": 390.1, "shortfall_ntd": 1756.0, "zero_days": 6, "winter_ratio": 100.8, "summer_ratio": 97.4, "seasonal_delta": -3.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV032", "cap_kwp": 32.24, "total_kwh": 37770.5, "avg_dy": 3.21, "pr_percent": 77.9, "ratio_to_target": 99.0, "shortfall_kwh": 368.3, "shortfall_ntd": 1657.0, "zero_days": 6, "winter_ratio": 101.3, "summer_ratio": 97.3, "seasonal_delta": -3.9, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV033", "cap_kwp": 32.24, "total_kwh": 37288.6, "avg_dy": 3.169, "pr_percent": 76.9, "ratio_to_target": 97.8, "shortfall_kwh": 850.2, "shortfall_ntd": 3826.0, "zero_days": 6, "winter_ratio": 99.3, "summer_ratio": 96.7, "seasonal_delta": -2.6, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV034", "cap_kwp": 32.24, "total_kwh": 36822.1, "avg_dy": 3.129, "pr_percent": 76.0, "ratio_to_target": 96.5, "shortfall_kwh": 1316.7, "shortfall_ntd": 5925.0, "zero_days": 6, "winter_ratio": 99.2, "summer_ratio": 85.5, "seasonal_delta": -13.7, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV035", "cap_kwp": 32.24, "total_kwh": 37608.0, "avg_dy": 3.196, "pr_percent": 77.6, "ratio_to_target": 98.6, "shortfall_kwh": 530.8, "shortfall_ntd": 2389.0, "zero_days": 6, "winter_ratio": 99.5, "summer_ratio": 98.2, "seasonal_delta": -1.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV036", "cap_kwp": 32.24, "total_kwh": 37169.5, "avg_dy": 3.159, "pr_percent": 76.7, "ratio_to_target": 97.5, "shortfall_kwh": 969.2, "shortfall_ntd": 4362.0, "zero_days": 6, "winter_ratio": 97.3, "summer_ratio": 97.0, "seasonal_delta": -0.2, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV037", "cap_kwp": 32.24, "total_kwh": 38139.3, "avg_dy": 3.241, "pr_percent": 78.7, "ratio_to_target": 100.0, "shortfall_kwh": -0.5, "shortfall_ntd": -2.0, "zero_days": 6, "winter_ratio": 100.0, "summer_ratio": 100.0, "seasonal_delta": 0.0, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV038", "cap_kwp": 32.86, "total_kwh": 32977.1, "avg_dy": 2.749, "pr_percent": 66.8, "ratio_to_target": 84.8, "shortfall_kwh": 5895.1, "shortfall_ntd": 26528.0, "zero_days": 6, "winter_ratio": 63.6, "summer_ratio": 100.9, "seasonal_delta": 37.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV039", "cap_kwp": 32.86, "total_kwh": 32686.9, "avg_dy": 2.725, "pr_percent": 66.2, "ratio_to_target": 84.1, "shortfall_kwh": 6185.4, "shortfall_ntd": 27834.0, "zero_days": 6, "winter_ratio": 61.9, "summer_ratio": 101.2, "seasonal_delta": 39.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV040", "cap_kwp": 32.86, "total_kwh": 33317.1, "avg_dy": 2.778, "pr_percent": 67.4, "ratio_to_target": 85.7, "shortfall_kwh": 5555.1, "shortfall_ntd": 24998.0, "zero_days": 6, "winter_ratio": 63.2, "summer_ratio": 103.1, "seasonal_delta": 39.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV041", "cap_kwp": 32.86, "total_kwh": 33570.3, "avg_dy": 2.799, "pr_percent": 68.0, "ratio_to_target": 86.4, "shortfall_kwh": 5301.9, "shortfall_ntd": 23858.0, "zero_days": 6, "winter_ratio": 62.9, "summer_ratio": 104.4, "seasonal_delta": 41.5, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV042", "cap_kwp": 32.86, "total_kwh": 33341.9, "avg_dy": 2.78, "pr_percent": 67.5, "ratio_to_target": 85.8, "shortfall_kwh": 5530.3, "shortfall_ntd": 24887.0, "zero_days": 6, "winter_ratio": 62.4, "summer_ratio": 103.8, "seasonal_delta": 41.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV043", "cap_kwp": 32.86, "total_kwh": 33227.1, "avg_dy": 2.77, "pr_percent": 67.3, "ratio_to_target": 85.5, "shortfall_kwh": 5645.1, "shortfall_ntd": 25403.0, "zero_days": 6, "winter_ratio": 62.1, "summer_ratio": 103.4, "seasonal_delta": 41.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV044", "cap_kwp": 32.86, "total_kwh": 32927.7, "avg_dy": 2.745, "pr_percent": 66.7, "ratio_to_target": 84.7, "shortfall_kwh": 5944.5, "shortfall_ntd": 26750.0, "zero_days": 6, "winter_ratio": 60.8, "summer_ratio": 103.0, "seasonal_delta": 42.2, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV045", "cap_kwp": 32.86, "total_kwh": 33943.7, "avg_dy": 2.83, "pr_percent": 68.7, "ratio_to_target": 87.3, "shortfall_kwh": 4928.5, "shortfall_ntd": 22178.0, "zero_days": 6, "winter_ratio": 69.2, "summer_ratio": 101.2, "seasonal_delta": 32.1, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}];
+const sortedInverters = [{"inv": "INV026", "cap_kwp": 32.86, "total_kwh": 29628.2, "avg_dy": 2.47, "pr_percent": 60.0, "ratio_to_target": 76.2, "shortfall_kwh": 9244.0, "shortfall_ntd": 41598.0, "zero_days": 6, "winter_ratio": 54.0, "summer_ratio": 91.8, "seasonal_delta": 37.8, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV004", "cap_kwp": 32.55, "total_kwh": 30629.3, "avg_dy": 2.578, "pr_percent": 62.6, "ratio_to_target": 79.5, "shortfall_kwh": 7876.2, "shortfall_ntd": 35443.0, "zero_days": 6, "winter_ratio": 58.7, "summer_ratio": 95.6, "seasonal_delta": 36.9, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV028", "cap_kwp": 32.86, "total_kwh": 30949.6, "avg_dy": 2.58, "pr_percent": 62.7, "ratio_to_target": 79.6, "shortfall_kwh": 7922.6, "shortfall_ntd": 35652.0, "zero_days": 6, "winter_ratio": 60.5, "summer_ratio": 93.3, "seasonal_delta": 32.8, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV002", "cap_kwp": 32.55, "total_kwh": 30789.9, "avg_dy": 2.592, "pr_percent": 62.9, "ratio_to_target": 80.0, "shortfall_kwh": 7715.6, "shortfall_ntd": 34720.0, "zero_days": 6, "winter_ratio": 59.5, "summer_ratio": 95.5, "seasonal_delta": 36.0, "severity": "P1 (嚴重異常需立即整改)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV024", "cap_kwp": 32.86, "total_kwh": 31196.2, "avg_dy": 2.601, "pr_percent": 63.2, "ratio_to_target": 80.3, "shortfall_kwh": 7676.1, "shortfall_ntd": 34542.0, "zero_days": 6, "winter_ratio": 60.1, "summer_ratio": 95.1, "seasonal_delta": 35.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV015", "cap_kwp": 32.86, "total_kwh": 31267.6, "avg_dy": 2.607, "pr_percent": 63.3, "ratio_to_target": 80.4, "shortfall_kwh": 7604.6, "shortfall_ntd": 34221.0, "zero_days": 6, "winter_ratio": 68.6, "summer_ratio": 88.6, "seasonal_delta": 20.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "組串失配／局部模組熱斑衰減＋高壓直流迴路壓降"}, {"inv": "INV003", "cap_kwp": 32.55, "total_kwh": 31017.9, "avg_dy": 2.611, "pr_percent": 63.4, "ratio_to_target": 80.6, "shortfall_kwh": 7487.7, "shortfall_ntd": 33694.0, "zero_days": 6, "winter_ratio": 59.9, "summer_ratio": 96.5, "seasonal_delta": 36.6, "severity": "P2 (中度異常效能落後)", "diagnosis": "嚴重冬季建築陰影遮蔽＋小港重工業鋼粉落塵覆蓋"}, {"inv": "INV005", "cap_kwp": 32.86, "total_kwh": 31823.0, "avg_dy": 2.653, "pr_percent": 64.4, "ratio_to_target": 81.9, "shortfall_kwh": 7049.3, "shortfall_ntd": 31722.0, "zero_days": 6, "winter_ratio": 60.0, "summer_ratio": 98.7, "seasonal_delta": 38.8, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV019", "cap_kwp": 33.48, "total_kwh": 32908.5, "avg_dy": 2.693, "pr_percent": 65.4, "ratio_to_target": 83.1, "shortfall_kwh": 6697.2, "shortfall_ntd": 30137.0, "zero_days": 6, "winter_ratio": 61.7, "summer_ratio": 99.5, "seasonal_delta": 37.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV014", "cap_kwp": 33.17, "total_kwh": 32611.3, "avg_dy": 2.694, "pr_percent": 65.4, "ratio_to_target": 83.1, "shortfall_kwh": 6627.7, "shortfall_ntd": 29825.0, "zero_days": 6, "winter_ratio": 95.3, "summer_ratio": 73.1, "seasonal_delta": -22.2, "severity": "P2 (中度異常效能落後)", "diagnosis": "組串斷路／直流熔絲熔斷（2026年4月突降20%）"}, {"inv": "INV018", "cap_kwp": 33.48, "total_kwh": 32982.9, "avg_dy": 2.699, "pr_percent": 65.5, "ratio_to_target": 83.3, "shortfall_kwh": 6622.7, "shortfall_ntd": 29802.0, "zero_days": 6, "winter_ratio": 61.1, "summer_ratio": 100.1, "seasonal_delta": 39.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV006", "cap_kwp": 32.86, "total_kwh": 32457.6, "avg_dy": 2.706, "pr_percent": 65.7, "ratio_to_target": 83.5, "shortfall_kwh": 6414.6, "shortfall_ntd": 28866.0, "zero_days": 6, "winter_ratio": 65.6, "summer_ratio": 97.0, "seasonal_delta": 31.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV017", "cap_kwp": 33.48, "total_kwh": 33065.9, "avg_dy": 2.706, "pr_percent": 65.7, "ratio_to_target": 83.5, "shortfall_kwh": 6539.8, "shortfall_ntd": 29429.0, "zero_days": 6, "winter_ratio": 61.1, "summer_ratio": 100.5, "seasonal_delta": 39.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV016", "cap_kwp": 33.48, "total_kwh": 33154.0, "avg_dy": 2.713, "pr_percent": 65.9, "ratio_to_target": 83.7, "shortfall_kwh": 6451.7, "shortfall_ntd": 29033.0, "zero_days": 6, "winter_ratio": 60.7, "summer_ratio": 101.1, "seasonal_delta": 40.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV039", "cap_kwp": 32.86, "total_kwh": 32686.9, "avg_dy": 2.725, "pr_percent": 66.2, "ratio_to_target": 84.1, "shortfall_kwh": 6185.4, "shortfall_ntd": 27834.0, "zero_days": 6, "winter_ratio": 61.9, "summer_ratio": 101.2, "seasonal_delta": 39.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV044", "cap_kwp": 32.86, "total_kwh": 32927.7, "avg_dy": 2.745, "pr_percent": 66.7, "ratio_to_target": 84.7, "shortfall_kwh": 5944.5, "shortfall_ntd": 26750.0, "zero_days": 6, "winter_ratio": 60.8, "summer_ratio": 103.0, "seasonal_delta": 42.2, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV038", "cap_kwp": 32.86, "total_kwh": 32977.1, "avg_dy": 2.749, "pr_percent": 66.8, "ratio_to_target": 84.8, "shortfall_kwh": 5895.1, "shortfall_ntd": 26528.0, "zero_days": 6, "winter_ratio": 63.6, "summer_ratio": 100.9, "seasonal_delta": 37.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV029", "cap_kwp": 32.86, "total_kwh": 33100.0, "avg_dy": 2.76, "pr_percent": 67.0, "ratio_to_target": 85.2, "shortfall_kwh": 5772.3, "shortfall_ntd": 25975.0, "zero_days": 6, "winter_ratio": 74.2, "summer_ratio": 92.2, "seasonal_delta": 18.0, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV043", "cap_kwp": 32.86, "total_kwh": 33227.1, "avg_dy": 2.77, "pr_percent": 67.3, "ratio_to_target": 85.5, "shortfall_kwh": 5645.1, "shortfall_ntd": 25403.0, "zero_days": 6, "winter_ratio": 62.1, "summer_ratio": 103.4, "seasonal_delta": 41.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV040", "cap_kwp": 32.86, "total_kwh": 33317.1, "avg_dy": 2.778, "pr_percent": 67.4, "ratio_to_target": 85.7, "shortfall_kwh": 5555.1, "shortfall_ntd": 24998.0, "zero_days": 6, "winter_ratio": 63.2, "summer_ratio": 103.1, "seasonal_delta": 39.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV042", "cap_kwp": 32.86, "total_kwh": 33341.9, "avg_dy": 2.78, "pr_percent": 67.5, "ratio_to_target": 85.8, "shortfall_kwh": 5530.3, "shortfall_ntd": 24887.0, "zero_days": 6, "winter_ratio": 62.4, "summer_ratio": 103.8, "seasonal_delta": 41.4, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV001", "cap_kwp": 32.55, "total_kwh": 33106.3, "avg_dy": 2.787, "pr_percent": 67.7, "ratio_to_target": 86.0, "shortfall_kwh": 5399.2, "shortfall_ntd": 24297.0, "zero_days": 6, "winter_ratio": 79.1, "summer_ratio": 90.0, "seasonal_delta": 10.9, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV041", "cap_kwp": 32.86, "total_kwh": 33570.3, "avg_dy": 2.799, "pr_percent": 68.0, "ratio_to_target": 86.4, "shortfall_kwh": 5301.9, "shortfall_ntd": 23858.0, "zero_days": 6, "winter_ratio": 62.9, "summer_ratio": 104.4, "seasonal_delta": 41.5, "severity": "P2 (中度異常效能落後)", "diagnosis": "冬季太子樓低仰角陰影遮蔽（夏冬比值落差逾35%）"}, {"inv": "INV045", "cap_kwp": 32.86, "total_kwh": 33943.7, "avg_dy": 2.83, "pr_percent": 68.7, "ratio_to_target": 87.3, "shortfall_kwh": 4928.5, "shortfall_ntd": 22178.0, "zero_days": 6, "winter_ratio": 69.2, "summer_ratio": 101.2, "seasonal_delta": 32.1, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV010", "cap_kwp": 33.17, "total_kwh": 34576.0, "avg_dy": 2.856, "pr_percent": 69.3, "ratio_to_target": 88.1, "shortfall_kwh": 4663.0, "shortfall_ntd": 20983.0, "zero_days": 6, "winter_ratio": 83.0, "summer_ratio": 91.3, "seasonal_delta": 8.3, "severity": "P2 (中度異常效能落後)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV007", "cap_kwp": 33.48, "total_kwh": 36492.0, "avg_dy": 2.986, "pr_percent": 72.5, "ratio_to_target": 92.1, "shortfall_kwh": 3113.7, "shortfall_ntd": 14011.0, "zero_days": 10, "winter_ratio": 90.9, "summer_ratio": 95.2, "seasonal_delta": 4.3, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "電網異常跳脫保護（累計10天離線）"}, {"inv": "INV008", "cap_kwp": 33.48, "total_kwh": 36524.4, "avg_dy": 2.989, "pr_percent": 72.6, "ratio_to_target": 92.2, "shortfall_kwh": 3081.3, "shortfall_ntd": 13866.0, "zero_days": 6, "winter_ratio": 90.1, "summer_ratio": 92.9, "seasonal_delta": 2.8, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV009", "cap_kwp": 33.17, "total_kwh": 36381.3, "avg_dy": 3.005, "pr_percent": 73.0, "ratio_to_target": 92.7, "shortfall_kwh": 2857.7, "shortfall_ntd": 12860.0, "zero_days": 6, "winter_ratio": 90.7, "summer_ratio": 93.3, "seasonal_delta": 2.6, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV013", "cap_kwp": 33.17, "total_kwh": 36565.4, "avg_dy": 3.02, "pr_percent": 73.3, "ratio_to_target": 93.2, "shortfall_kwh": 2673.5, "shortfall_ntd": 12031.0, "zero_days": 6, "winter_ratio": 97.7, "summer_ratio": 89.6, "seasonal_delta": -8.0, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV011", "cap_kwp": 33.17, "total_kwh": 36907.0, "avg_dy": 3.048, "pr_percent": 74.0, "ratio_to_target": 94.1, "shortfall_kwh": 2331.9, "shortfall_ntd": 10494.0, "zero_days": 6, "winter_ratio": 96.9, "summer_ratio": 91.5, "seasonal_delta": -5.3, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "工業落塵積垢與表面透光衰退"}, {"inv": "INV030", "cap_kwp": 33.48, "total_kwh": 37308.6, "avg_dy": 3.053, "pr_percent": 74.1, "ratio_to_target": 94.2, "shortfall_kwh": 2297.0, "shortfall_ntd": 10337.0, "zero_days": 16, "winter_ratio": 98.2, "summer_ratio": 79.6, "seasonal_delta": -18.6, "severity": "P3 (輕度偏離持續觀察)", "diagnosis": "逆變器跳脫離線與高溫通訊中斷（累計16天零發電）"}, {"inv": "INV012", "cap_kwp": 33.17, "total_kwh": 37376.1, "avg_dy": 3.087, "pr_percent": 75.0, "ratio_to_target": 95.3, "shortfall_kwh": 1862.8, "shortfall_ntd": 8383.0, "zero_days": 6, "winter_ratio": 97.9, "summer_ratio": 93.2, "seasonal_delta": -4.7, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV023", "cap_kwp": 33.48, "total_kwh": 37741.2, "avg_dy": 3.088, "pr_percent": 75.0, "ratio_to_target": 95.3, "shortfall_kwh": 1864.5, "shortfall_ntd": 8390.0, "zero_days": 6, "winter_ratio": 98.8, "summer_ratio": 96.4, "seasonal_delta": -2.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV027", "cap_kwp": 32.86, "total_kwh": 37362.0, "avg_dy": 3.115, "pr_percent": 75.6, "ratio_to_target": 96.1, "shortfall_kwh": 1510.2, "shortfall_ntd": 6796.0, "zero_days": 6, "winter_ratio": 98.4, "summer_ratio": 93.1, "seasonal_delta": -5.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV025", "cap_kwp": 32.86, "total_kwh": 37463.4, "avg_dy": 3.124, "pr_percent": 75.8, "ratio_to_target": 96.4, "shortfall_kwh": 1408.9, "shortfall_ntd": 6340.0, "zero_days": 6, "winter_ratio": 97.9, "summer_ratio": 94.4, "seasonal_delta": -3.5, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV034", "cap_kwp": 32.24, "total_kwh": 36822.1, "avg_dy": 3.129, "pr_percent": 76.0, "ratio_to_target": 96.5, "shortfall_kwh": 1316.7, "shortfall_ntd": 5925.0, "zero_days": 6, "winter_ratio": 99.2, "summer_ratio": 85.5, "seasonal_delta": -13.7, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV036", "cap_kwp": 32.24, "total_kwh": 37169.5, "avg_dy": 3.159, "pr_percent": 76.7, "ratio_to_target": 97.5, "shortfall_kwh": 969.2, "shortfall_ntd": 4362.0, "zero_days": 6, "winter_ratio": 97.3, "summer_ratio": 97.0, "seasonal_delta": -0.2, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV020", "cap_kwp": 33.48, "total_kwh": 38630.8, "avg_dy": 3.161, "pr_percent": 76.8, "ratio_to_target": 97.5, "shortfall_kwh": 974.9, "shortfall_ntd": 4387.0, "zero_days": 7, "winter_ratio": 99.0, "summer_ratio": 98.4, "seasonal_delta": -0.6, "severity": "P4 (健康標竿)", "diagnosis": "電網異常跳脫保護（累計7天離線）"}, {"inv": "INV022", "cap_kwp": 33.48, "total_kwh": 38729.3, "avg_dy": 3.169, "pr_percent": 77.0, "ratio_to_target": 97.8, "shortfall_kwh": 876.4, "shortfall_ntd": 3944.0, "zero_days": 6, "winter_ratio": 98.9, "summer_ratio": 97.3, "seasonal_delta": -1.6, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV033", "cap_kwp": 32.24, "total_kwh": 37288.6, "avg_dy": 3.169, "pr_percent": 76.9, "ratio_to_target": 97.8, "shortfall_kwh": 850.2, "shortfall_ntd": 3826.0, "zero_days": 6, "winter_ratio": 99.3, "summer_ratio": 96.7, "seasonal_delta": -2.6, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV021", "cap_kwp": 33.48, "total_kwh": 38770.1, "avg_dy": 3.173, "pr_percent": 77.0, "ratio_to_target": 97.9, "shortfall_kwh": 835.6, "shortfall_ntd": 3760.0, "zero_days": 8, "winter_ratio": 99.7, "summer_ratio": 99.0, "seasonal_delta": -0.7, "severity": "P4 (健康標竿)", "diagnosis": "電網異常跳脫保護（累計8天離線）"}, {"inv": "INV035", "cap_kwp": 32.24, "total_kwh": 37608.0, "avg_dy": 3.196, "pr_percent": 77.6, "ratio_to_target": 98.6, "shortfall_kwh": 530.8, "shortfall_ntd": 2389.0, "zero_days": 6, "winter_ratio": 99.5, "summer_ratio": 98.2, "seasonal_delta": -1.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV031", "cap_kwp": 32.24, "total_kwh": 37748.7, "avg_dy": 3.208, "pr_percent": 77.9, "ratio_to_target": 99.0, "shortfall_kwh": 390.1, "shortfall_ntd": 1756.0, "zero_days": 6, "winter_ratio": 100.8, "summer_ratio": 97.4, "seasonal_delta": -3.4, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV032", "cap_kwp": 32.24, "total_kwh": 37770.5, "avg_dy": 3.21, "pr_percent": 77.9, "ratio_to_target": 99.0, "shortfall_kwh": 368.3, "shortfall_ntd": 1657.0, "zero_days": 6, "winter_ratio": 101.3, "summer_ratio": 97.3, "seasonal_delta": -3.9, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}, {"inv": "INV037", "cap_kwp": 32.24, "total_kwh": 38139.3, "avg_dy": 3.241, "pr_percent": 78.7, "ratio_to_target": 100.0, "shortfall_kwh": -0.5, "shortfall_ntd": -2.0, "zero_days": 6, "winter_ratio": 100.0, "summer_ratio": 100.0, "seasonal_delta": 0.0, "severity": "P4 (健康標竿)", "diagnosis": "全場高效運行標竿機台"}];
+const chartDatasets = {"month_labels": ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"], "monthly_gen": [107035.8, 100537.7, 108337.5, 114254.8, 121054.4, 164200.3, 151161.2, 183128.2, 130273.7, 109953.5, 105354.9, 141752.6, 23009.3], "monthly_target_gen": [117517.8, 109415.5, 118036.0, 131321.4, 139302.2, 185235.6, 171102.7, 212209.7, 149098.1, 120543.1, 114569.0, 158933.7, 25632.9], "monthly_irr": [100.8, 93.8, 101.2, 112.6, 119.5, 158.9, 146.7, 182.0, 127.9, 103.4, 98.3, 136.3, 22.0], "monthly_plant_dy": [2.779, 2.262, 2.359, 2.488, 2.918, 3.575, 3.401, 3.987, 2.931, 2.394, 2.294, 3.189, 3.106], "monthly_inv37_dy": [3.225, 2.739, 2.996, 3.092, 3.457, 4.066, 3.66, 4.143, 3.027, 2.531, 2.399, 3.524, 3.569], "monthly_inv14_dy": [2.81, 2.531, 2.85, 2.955, 3.194, 3.5, 2.864, 3.037, 2.18, 1.879, 1.745, 2.787, 2.973], "monthly_inv26_dy": [2.236, 1.674, 1.564, 1.725, 2.233, 3.059, 3.145, 3.874, 2.854, 2.261, 2.164, 2.798, 2.546]};
+
+let currentSlide = 0;
+const totalSlides = 13;
+let supabaseClient = null;
+
+// ==============================================================================
+// 2. 幻燈片切換與卷軸模式
+// ==============================================================================
+function goToSlide(n) {
+  if (n < 0 || n >= totalSlides) return;
+  currentSlide = n;
+  document.querySelectorAll('.slide').forEach((s, i) => {
+    s.classList.toggle('active', i === currentSlide);
+  });
+  document.querySelectorAll('.navtab').forEach((t, i) => {
+    t.classList.toggle('active', i === currentSlide);
+  });
+  const indicator = document.getElementById('slideIndicator');
+  if (indicator) indicator.textContent = (currentSlide + 1) + ' / ' + totalSlides;
+  
+  // Resize ECharts
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, 100);
+
+  // Scroll into view if in continuous mode
+  if (document.body.classList.contains('continuous-mode')) {
+    const el = document.getElementById('slide-' + n);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function nextSlide() {
+  if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+}
+function prevSlide() {
+  if (currentSlide > 0) goToSlide(currentSlide - 1);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+});
+
+function toggleViewMode() {
+  const isContinuous = document.body.classList.toggle('continuous-mode');
+  document.body.classList.toggle('presentation-mode', !isContinuous);
+  const btn = document.getElementById('viewToggleBtn');
+  const ctrl = document.getElementById('slideControls');
+  if (isContinuous) {
+    btn.innerHTML = '🖥️ 簡報模式';
+    ctrl.style.display = 'none';
+  } else {
+    btn.innerHTML = '📑 卷軸模式';
+    ctrl.style.display = 'flex';
+    goToSlide(currentSlide);
+  }
+}
+
+// ==============================================================================
+// 3. ECharts 初始化
+// ==============================================================================
+let chartInstances = {};
+
+function initCharts() {
+  // Chart 1: Monthly Irradiance vs Generation
+  const elMonthly = document.getElementById('chartMonthly');
+  if (elMonthly) {
+    const c1 = echarts.init(elMonthly);
+    c1.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+      legend: { data: ['全場實績發電量 (kWh)', '整改目標發電量 (kWh)', '日照量 (kWh/㎡)'], top: 5 },
+      grid: { left: '3%', right: '4%', bottom: '8%', containLabel: true },
+      xAxis: { type: 'category', data: chartDatasets.month_labels },
+      yAxis: [
+        { type: 'value', name: '發電量 (kWh)' },
+        { type: 'value', name: '日照 (kWh/㎡)', position: 'right' }
+      ],
+      series: [
+        { name: '全場實績發電量 (kWh)', type: 'bar', data: chartDatasets.monthly_gen, itemStyle: { color: '#1968AD' } },
+        { name: '整改目標發電量 (kWh)', type: 'line', data: chartDatasets.monthly_target_gen, itemStyle: { color: '#2E7D32' }, lineStyle: { width: 3, type: 'dashed' } },
+        { name: '日照量 (kWh/㎡)', type: 'line', yAxisIndex: 1, data: chartDatasets.monthly_irr, itemStyle: { color: '#E09A2B' }, lineStyle: { width: 2 } }
+      ]
+    });
+    chartInstances['monthly'] = c1;
+  }
+
+  // Chart 2: 45 Inverter Ranking Bar Chart
+  const elRank = document.getElementById('chartInverterRanking');
+  if (elRank) {
+    const c2 = echarts.init(elRank);
+    const names = sortedInverters.map(x => x.inv);
+    const dys = sortedInverters.map(x => x.avg_dy);
+    const colors = sortedInverters.map(x => {
+      if (x.ratio_to_target < 80.0) return '#D95F45';
+      if (x.ratio_to_target < 90.0) return '#E09A2B';
+      if (x.ratio_to_target < 95.0) return '#1968AD';
+      return '#2E7D32';
+    });
+
+    c2.setOption({
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          const p = params[0];
+          const inv = sortedInverters[p.dataIndex];
+          return '<strong>' + inv.inv + '</strong> (' + inv.cap_kwp + ' kWp)<br/>' +
+                 '平均 DY: <strong>' + inv.avg_dy + '</strong> kWh/kWp/day<br/>' +
+                 '系統 PR: ' + inv.pr_percent + '%<br/>' +
+                 '標竿比值: ' + inv.ratio_to_target + '%<br/>' +
+                 '年短少: <strong>' + inv.shortfall_kwh.toLocaleString() + '</strong> kWh<br/>' +
+                 '異常診斷: ' + inv.diagnosis;
+        }
+      },
+      grid: { left: '2%', right: '3%', bottom: '15%', top: '10%', containLabel: true },
+      xAxis: {
+        type: 'category', data: names,
+        axisLabel: { rotate: 45, interval: 0, fontSize: 10, fontFamily: 'monospace' }
+      },
+      yAxis: {
+        type: 'value', name: '日等價時數 (DY: kWh/kWp/day)', min: 2.0, max: 3.5
+      },
+      series: [
+        {
+          name: '平均 DY', type: 'bar',
+          data: dys.map((val, idx) => ({ value: val, itemStyle: { color: colors[idx] } })),
+          markLine: {
+            data: [
+              { yAxis: 3.241, name: '標竿目標 DY 3.241', lineStyle: { color: '#2E7D32', width: 2, type: 'dashed' } },
+              { yAxis: 2.884, name: '現況平均 DY 2.884', lineStyle: { color: '#D95F45', width: 2, type: 'dashed' } }
+            ],
+            label: { position: 'insideEndTop', formatter: '{b}: {c}' }
+          }
+        }
+      ]
+    });
+    chartInstances['rank'] = c2;
+  }
+
+  // Chart 3: Seasonal Delta
+  const elDelta = document.getElementById('chartSeasonalDelta');
+  if (elDelta) {
+    const c3 = echarts.init(elDelta);
+    const sortedByDelta = [...rawInverters].sort((a,b) => a.seasonal_delta - b.seasonal_delta);
+    c3.setOption({
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          const inv = sortedByDelta[params[0].dataIndex];
+          return '<strong>' + inv.inv + '</strong><br/>' +
+                 '夏冬比值落差: <strong>' + inv.seasonal_delta + '%</strong><br/>' +
+                 '冬季比值 (12~1月): ' + inv.winter_ratio + '%<br/>' +
+                 '夏季比值 (6~7月): ' + inv.summer_ratio + '%<br/>' +
+                 '年均 DY: ' + inv.avg_dy;
+        }
+      },
+      grid: { left: '3%', right: '3%', bottom: '15%', top: '10%', containLabel: true },
+      xAxis: {
+        type: 'category', data: sortedByDelta.map(x => x.inv),
+        axisLabel: { rotate: 45, interval: 0, fontSize: 9 }
+      },
+      yAxis: { type: 'value', name: '夏冬比值落差 (%)' },
+      series: [
+        {
+          type: 'bar',
+          data: sortedByDelta.map(x => ({
+            value: x.seasonal_delta,
+            itemStyle: { color: x.seasonal_delta > 30 ? '#D95F45' : '#1968AD' }
+          })),
+          markLine: {
+            data: [{ yAxis: 30, name: '嚴重遮陰/落塵臨界線 (30%)', lineStyle: { color: '#D95F45', type: 'dashed' } }]
+          }
+        }
+      ]
+    });
+    chartInstances['delta'] = c3;
+  }
+
+  // Chart 4: INV014 Step Drop vs INV037
+  const elStep = document.getElementById('chartStepDrop');
+  if (elStep) {
+    const c4 = echarts.init(elStep);
+    c4.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['INV037 (標竿健康機台)', 'INV014 (4月直流斷路)', 'INV026 (重度遮陰落塵)'] },
+      grid: { left: '3%', right: '4%', bottom: '8%', containLabel: true },
+      xAxis: { type: 'category', data: chartDatasets.month_labels },
+      yAxis: { type: 'value', name: '月平均 DY (kWh/kWp/day)' },
+      series: [
+        { name: 'INV037 (標竿健康機台)', type: 'line', data: chartDatasets.monthly_inv37_dy, itemStyle: { color: '#2E7D32' }, lineStyle: { width: 3 } },
+        { name: 'INV014 (4月直流斷路)', type: 'line', data: chartDatasets.monthly_inv14_dy, itemStyle: { color: '#D95F45' }, lineStyle: { width: 3 } },
+        { name: 'INV026 (重度遮陰落塵)', type: 'line', data: chartDatasets.monthly_inv26_dy, itemStyle: { color: '#E09A2B' }, lineStyle: { width: 2, type: 'dotted' } }
+      ]
+    });
+    chartInstances['step'] = c4;
+  }
+
+  // Chart 5: Before / After
+  const elBA = document.getElementById('chartBeforeAfter');
+  if (elBA) {
+    const c5 = echarts.init(elBA);
+    c5.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['現況實績發電量 (DY 2.89)', '整改後目標發電量 (DY 3.241)', '每月回補增益 (kWh)'] },
+      grid: { left: '3%', right: '4%', bottom: '8%', containLabel: true },
+      xAxis: { type: 'category', data: chartDatasets.month_labels },
+      yAxis: { type: 'value', name: '發電量 (kWh)' },
+      series: [
+        { name: '現況實績發電量 (DY 2.89)', type: 'bar', data: chartDatasets.monthly_gen, itemStyle: { color: '#5B7285' } },
+        { name: '整改後目標發電量 (DY 3.241)', type: 'bar', data: chartDatasets.monthly_target_gen, itemStyle: { color: '#1968AD' } },
+        {
+          name: '每月回補增益 (kWh)', type: 'line',
+          data: chartDatasets.monthly_target_gen.map((v, i) => Math.round(v - chartDatasets.monthly_gen[i])),
+          itemStyle: { color: '#2E7D32' }, lineStyle: { width: 3 }
+        }
+      ]
+    });
+    chartInstances['ba'] = c5;
+  }
+
+  // Chart 6: 20-Year DCF
+  const elDCF = document.getElementById('chartDCF');
+  if (elDCF) {
+    const c6 = echarts.init(elDCF);
+    const years = Array.from({length: 16}, (_, i) => '第 ' + i + ' 年');
+    const initialInvestment = -3803328;
+    const annualBenefit = 867887;
+    let cumCashFlow = [initialInvestment];
+    let withoutRetrofitLoss = [0];
+
+    for (let yr = 1; yr <= 15; yr++) {
+      const netYr = initialInvestment + (annualBenefit * yr);
+      cumCashFlow.push(Math.round(netYr));
+      withoutRetrofitLoss.push(Math.round(-annualBenefit * yr));
+    }
+
+    c6.setOption({
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          let res = '<strong>' + params[0].name + '</strong><br/>';
+          params.forEach(p => {
+            res += p.seriesName + ': <strong>' + p.value.toLocaleString() + '</strong> 元<br/>';
+          });
+          return res;
+        }
+      },
+      legend: { data: ['修繕投資累計淨現金流 (含投入成本)', '若不整改之電費累計損失'] },
+      grid: { left: '3%', right: '4%', bottom: '8%', containLabel: true },
+      xAxis: { type: 'category', data: years },
+      yAxis: { type: 'value', name: '金額 (NT$)' },
+      series: [
+        {
+          name: '修繕投資累計淨現金流 (含投入成本)', type: 'line',
+          data: cumCashFlow,
+          itemStyle: { color: '#2E7D32' }, lineStyle: { width: 3 },
+          areaStyle: { color: 'rgba(46,125,50,0.1)' },
+          markPoint: {
+            data: [
+              { name: '損益平衡點 (4.38年)', coord: [4.38, 0], symbol: 'pin', symbolSize: 50, itemStyle: { color: '#E09A2B' }, label: { formatter: '4.38年\n回本' } }
+            ]
+          }
+        },
+        {
+          name: '若不整改之電費累計損失', type: 'line',
+          data: withoutRetrofitLoss,
+          itemStyle: { color: '#D95F45' }, lineStyle: { width: 2, type: 'dashed' }
+        }
+      ]
+    });
+    chartInstances['dcf'] = c6;
+  }
+}
+
+// ==============================================================================
+// 4. Leaflet 地圖初始化
+// ==============================================================================
+function initMap() {
+  const mapEl = document.getElementById('plantMap');
+  if (!mapEl) return;
+  // 812高雄市小港區店鎮里嘉興街8號 (22.5601° N, 120.3392° E)
+  const map = L.map('plantMap').setView([22.5601, 120.3392], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const marker = L.marker([22.5601, 120.3392]).addTo(map);
+  marker.bindPopup(`
+    <div style="font-size:12px; line-height:1.5;">
+      <strong>遠東鋼鐵一~三期屋頂光電電廠</strong><br/>
+      📍 812 高雄市小港區店鎮里嘉興街 8 號<br/>
+      ⚡ 容量：1,481.80 kWp (45台變流器)<br/>
+      🎯 目標：DY 2.89 → 3.241<br/>
+      💰 整改預算：NT$ 3,803,328 (未稅)
+    </div>
+  `).openPopup();
+}
+
+// ==============================================================================
+// 5. 45 台變流器表格填充與搜尋篩選
+// ==============================================================================
+function populateInverterTable(dataList) {
+  const tbody = document.getElementById('inverterTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  dataList.forEach(inv => {
+    const tr = document.createElement('tr');
+    let badgeClass = 'badge-p4';
+    if (inv.severity.startsWith('P1')) badgeClass = 'badge-p1';
+    else if (inv.severity.startsWith('P2')) badgeClass = 'badge-p2';
+    else if (inv.severity.startsWith('P3')) badgeClass = 'badge-p3';
+
+    tr.innerHTML = `
+      <td style="font-weight:800; font-family:monospace; color:var(--ink);">${inv.inv}</td>
+      <td>${inv.cap_kwp}</td>
+      <td>${inv.total_kwh.toLocaleString()}</td>
+      <td><strong>${inv.avg_dy}</strong></td>
+      <td>${inv.pr_percent}%</td>
+      <td><strong>${inv.ratio_to_target}%</strong></td>
+      <td style="color:${inv.shortfall_kwh > 5000 ? 'var(--coral)' : 'inherit'}; font-weight:700;">
+        ${inv.shortfall_kwh.toLocaleString()}
+      </td>
+      <td>${inv.shortfall_ntd.toLocaleString()}</td>
+      <td>${inv.seasonal_delta}%</td>
+      <td><span class="badge ${badgeClass}">${inv.severity.split(' ')[0]}</span></td>
+      <td style="font-size:0.75rem; color:var(--ink-2);">${inv.diagnosis}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterInverterTable() {
+  const kw = document.getElementById('invSearchInput').value.trim().toUpperCase();
+  const sev = document.getElementById('invSeverityFilter').value;
+
+  const filtered = rawInverters.filter(x => {
+    const matchKw = !kw || x.inv.toUpperCase().includes(kw) || x.diagnosis.includes(kw);
+    const matchSev = (sev === 'all') || x.severity.startsWith(sev);
+    return matchKw && matchSev;
+  });
+
+  populateInverterTable(filtered);
+}
+
+function exportInverterCSV() {
+  let csv = '變流器編號,容量(kWp),年度發電量(kWh),平均DY,系統PR(%),標竿比值(%),年度短少(kWh),年短少金額(NT$),夏冬比值落差(%),異常等級,根本原因診斷\n';
+  rawInverters.forEach(r => {
+    csv += `"${r.inv}",${r.cap_kwp},${r.total_kwh},${r.avg_dy},${r.pr_percent},${r.ratio_to_target},${r.shortfall_kwh},${r.shortfall_ntd},${r.seasonal_delta},"${r.severity}","${r.diagnosis}"\n`;
+  });
+  const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '遠東鋼鐵一至三期_45台變流器診斷明細.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==============================================================================
+// 6. Supabase 整合機制 (Auth, Storage, Database)
+// ==============================================================================
+function initSupabase() {
+  const url = localStorage.getItem('SOLAR_8D_SUPABASE_URL') || window.ENV_SUPABASE_URL;
+  const key = localStorage.getItem('SOLAR_8D_SUPABASE_KEY') || window.ENV_SUPABASE_KEY;
+  if (url && key && window.supabase) {
+    try {
+      supabaseClient = window.supabase.createClient(url, key);
+      updateConnUI(true);
+    } catch(e) {
+      console.warn("Supabase init error:", e);
+      updateConnUI(false);
+    }
+  } else {
+    updateConnUI(false);
+  }
+}
+
+function updateConnUI(isOnline) {
+  const pill = document.getElementById('connStatusPill');
+  const text = document.getElementById('connStatusText');
+  if (!pill || !text) return;
+  if (isOnline) {
+    pill.className = "conn-pill online";
+    text.textContent = "Supabase 雲端已連線";
+  } else {
+    pill.className = "conn-pill local";
+    text.textContent = "本地展示模式";
+  }
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function saveSupabaseSettings() {
+  const url = document.getElementById('cfg_supabase_url').value.trim();
+  const key = document.getElementById('cfg_supabase_key').value.trim();
+  if (!url || !key) {
+    alert("請輸入有效的 Supabase URL 與 Anon Key！");
+    return;
+  }
+  localStorage.setItem('SOLAR_8D_SUPABASE_URL', url);
+  localStorage.setItem('SOLAR_8D_SUPABASE_KEY', key);
+  initSupabase();
+  closeModal('settingsModal');
+  alert("Supabase 連線設定已成功儲存！");
+}
+
+async function testSupabaseConnection() {
+  const url = document.getElementById('cfg_supabase_url').value.trim();
+  const key = document.getElementById('cfg_supabase_key').value.trim();
+  if (!url || !key) {
+    alert("請先填寫 URL 與 Key");
+    return;
+  }
+  try {
+    const client = window.supabase.createClient(url, key);
+    const { data, error } = await client.from('reports_8d').select('count', { count: 'exact', head: true });
+    if (error) throw error;
+    alert("連線成功！Supabase 伺服器通訊正常。");
+  } catch(e) {
+    alert("連線失敗：" + e.message);
+  }
+}
+
+// 線上整改工單簽認送出
+async function submitRepairOrder(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('orderSubmitStatus');
+  statusEl.innerHTML = '<span style="color:var(--blue);">⏳ 正在提交簽認至雲端...</span>';
+
+  const orderData = {
+    case_no: "PV-2026-KH01",
+    plant_name: "遠東鋼鐵一~三期 1,481.8kWp",
+    signer_name: document.getElementById('signer_name').value.trim(),
+    signer_contact: document.getElementById('signer_contact').value.trim(),
+    budget_ntd: 3803328,
+    schedule_notes: document.getElementById('order_schedule').value.trim(),
+    notes: document.getElementById('order_notes').value.trim(),
+    created_at: new Date().toISOString()
+  };
+
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient.from('work_orders').insert([orderData]);
+      if (error) throw error;
+      statusEl.innerHTML = '<span style="color:var(--green);">✅ 簽認成功！工單已即時同步至 Supabase 資料庫。</span>';
+    } catch(err) {
+      console.warn("寫入 Supabase 失敗，轉為儲存至本地：", err);
+      saveOrderLocal(orderData, statusEl);
+    }
+  } else {
+    saveOrderLocal(orderData, statusEl);
+  }
+}
+
+function saveOrderLocal(orderData, statusEl) {
+  const orders = JSON.parse(localStorage.getItem('LOCAL_ORDERS') || '[]');
+  orders.push(orderData);
+  localStorage.setItem('LOCAL_ORDERS', JSON.stringify(orders));
+  statusEl.innerHTML = '<span style="color:var(--green);">✅ 簽認完成！(本地展示記錄已儲存，若連線 Supabase 將自動同步)</span>';
+}
+
+// 照片上傳直傳
+async function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const progress = document.getElementById('uploadProgress');
+  const list = document.getElementById('uploadedList');
+  progress.textContent = `⏳ 正在上傳 ${file.name} ...`;
+
+  if (supabaseClient) {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `KH01_${Date.now()}_${Math.random().toString(36).substring(2,6)}.${fileExt}`;
+      const { data, error } = await supabaseClient.storage.from('solar-8d-evidences').upload(`evidences/${fileName}`, file);
+      if (error) throw error;
+      const { data: pubData } = supabaseClient.storage.from('solar-8d-evidences').getPublicUrl(`evidences/${fileName}`);
+
+      progress.textContent = "✅ 上傳成功！";
+      appendUploadedItem(file.name, pubData.publicUrl);
+    } catch(err) {
+      progress.textContent = "⚠️ 上傳失敗：" + err.message + " (使用本地預覽)";
+      showLocalPreview(file);
+    }
+  } else {
+    progress.textContent = "💡 本地展示模式：已生成即時預覽。";
+    showLocalPreview(file);
+  }
+}
+
+function showLocalPreview(file) {
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    appendUploadedItem(file.name, evt.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function appendUploadedItem(name, url) {
+  const list = document.getElementById('uploadedList');
+  const div = document.createElement('div');
+  div.style.cssText = "display:flex; align-items:center; gap:8px; background:#fff; padding:6px 10px; border-radius:6px; border:1px solid var(--line); font-size:0.75rem;";
+  div.innerHTML = `
+    <img src="${url}" style="width:36px; height:36px; object-fit:cover; border-radius:4px;">
+    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+      <strong>${name}</strong><br/>
+      <a href="${url}" target="_blank" style="color:var(--blue); text-decoration:none;">查看全圖</a>
+    </div>
+    <span class="badge badge-p4">已存儲</span>
+  `;
+  list.prepend(div);
+}
+
+// ==============================================================================
+// 7. 頁面載入初始化
+// ==============================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  initSupabase();
+  initMap();
+  initCharts();
+  populateInverterTable(rawInverters);
+
+  window.addEventListener('resize', () => {
+    Object.values(chartInstances).forEach(c => c && c.resize());
+  });
+});
+</script>
+</body>
+</html>
